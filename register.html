@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <style>
-        /* ========================================================== */
         * {
             margin: 0;
             padding: 0;
@@ -90,7 +89,11 @@
             height: 100%;
             animation: ringSpin 90s linear infinite;
         }
-        @keyframes ringSpin { to { transform: rotate(360deg); } }
+        @keyframes ringSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
         .ring .tick {
             stroke: rgba(255, 255, 255, 0.14);
             stroke-width: 3;
@@ -101,7 +104,9 @@
             filter: drop-shadow(0 0 5px rgba(245, 166, 35, 0.85));
         }
         @media (prefers-reduced-motion: reduce) {
-            .ring svg { animation: none; }
+            .ring svg {
+                animation: none;
+            }
         }
 
         .register-container {
@@ -117,11 +122,19 @@
             animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(30px) scale(0.97); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         @media (prefers-reduced-motion: reduce) {
-            .register-container { animation: none; }
+            .register-container {
+                animation: none;
+            }
         }
 
         .title {
@@ -134,7 +147,9 @@
             margin-bottom: 26px;
         }
 
-        .form-group { margin-bottom: 16px; }
+        .form-group {
+            margin-bottom: 16px;
+        }
         .form-group label {
             display: block;
             font-size: 0.78rem;
@@ -164,7 +179,9 @@
             display: flex;
             pointer-events: none;
         }
-        .input-wrap:focus-within .input-icon { color: var(--gold); }
+        .input-wrap:focus-within .input-icon {
+            color: var(--gold);
+        }
 
         .input-wrap input {
             width: 100%;
@@ -177,7 +194,10 @@
             outline: none;
             text-align: right;
         }
-        .input-wrap input::placeholder { color: var(--text-faint); font-weight: 400; }
+        .input-wrap input::placeholder {
+            color: var(--text-faint);
+            font-weight: 400;
+        }
 
         .input-wrap .toggle-password {
             position: absolute;
@@ -209,9 +229,15 @@
             font-weight: 700;
             margin-top: 6px;
         }
-        .field-error.show { display: flex; }
-        .input-wrap.invalid { border-color: var(--danger); }
-        .input-wrap.invalid:focus-within { box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15); }
+        .field-error.show {
+            display: flex;
+        }
+        .input-wrap.invalid {
+            border-color: var(--danger);
+        }
+        .input-wrap.invalid:focus-within {
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+        }
 
         .btn-primary {
             width: 100%;
@@ -243,13 +269,21 @@
             transform: translateX(-100%);
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .btn-primary:hover::before { transform: translateX(100%); }
+        .btn-primary:hover::before {
+            transform: translateX(100%);
+        }
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 16px 36px rgba(245, 166, 35, 0.36);
         }
-        .btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.98); }
-        .btn-primary:disabled { cursor: not-allowed; opacity: 0.75; box-shadow: none; }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+        .btn-primary:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
+            box-shadow: none;
+        }
 
         .btn-primary .ripple {
             position: absolute;
@@ -259,7 +293,12 @@
             animation: rippleAnim 0.6s ease-out;
             pointer-events: none;
         }
-        @keyframes rippleAnim { to { transform: scale(3); opacity: 0; } }
+        @keyframes rippleAnim {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
 
         .btn-spinner {
             display: none;
@@ -270,10 +309,22 @@
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
         }
-        .btn-primary.loading .btn-spinner { display: inline-block; }
-        .btn-primary.loading .btn-label { opacity: 0.85; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (prefers-reduced-motion: reduce) { .btn-spinner { animation: none; } }
+        .btn-primary.loading .btn-spinner {
+            display: inline-block;
+        }
+        .btn-primary.loading .btn-label {
+            opacity: 0.85;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .btn-spinner {
+                animation: none;
+            }
+        }
 
         .message {
             text-align: center;
@@ -301,17 +352,46 @@
             animation: shake 0.5s ease;
         }
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-6px); }
-            40% { transform: translateX(6px); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-6px);
+            }
+            40% {
+                transform: translateX(6px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
         }
-        @media (prefers-reduced-motion: reduce) { .message.error { animation: none; } }
+        @media (prefers-reduced-motion: reduce) {
+            .message.error {
+                animation: none;
+            }
+        }
 
-        .checkmark { width: 16px; height: 16px; flex-shrink: 0; }
-        .checkmark circle { stroke: var(--success); stroke-width: 2; fill: none; }
-        .checkmark path { stroke: var(--success); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .checkmark {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .checkmark circle {
+            stroke: var(--success);
+            stroke-width: 2;
+            fill: none;
+        }
+        .checkmark path {
+            stroke: var(--success);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
 
         .links {
             text-align: center;
@@ -325,7 +405,10 @@
             text-decoration: none;
             font-weight: 800;
         }
-        .links a:hover { text-decoration: underline; color: var(--gold-light); }
+        .links a:hover {
+            text-decoration: underline;
+            color: var(--gold-light);
+        }
 
         .copyright {
             text-align: center;
@@ -337,26 +420,38 @@
             font-weight: 600;
             letter-spacing: 0.4px;
         }
-        .copyright strong { color: rgba(245, 166, 35, 0.45); }
+        .copyright strong {
+            color: rgba(245, 166, 35, 0.45);
+        }
 
-        a:focus-visible, button:focus-visible {
+        a:focus-visible,
+        button:focus-visible {
             outline: 2px solid var(--gold);
             outline-offset: 2px;
         }
         .input-wrap input:focus,
-        .input-wrap input:focus-visible { outline: none; }
+        .input-wrap input:focus-visible {
+            outline: none;
+        }
 
         @media (max-width: 480px) {
-            .register-container { padding: 30px 22px 24px; border-radius: 20px; }
-            .title { font-size: 1.6rem; }
+            .register-container {
+                padding: 30px 22px 24px;
+                border-radius: 20px;
+            }
+            .title {
+                font-size: 1.6rem;
+            }
         }
         @media (max-width: 480px) and (max-height: 700px) {
-            body { align-items: flex-start; padding-top: 20px; }
+            body {
+                align-items: flex-start;
+                padding-top: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- تم إزالة class="loading" -->
 
     <div class="ring-wrap" id="ringWrap">
         <div class="ring" id="ring" aria-hidden="true"></div>
@@ -371,7 +466,10 @@
                     <label for="name">الاسم الكامل</label>
                     <div class="input-wrap" id="nameWrap">
                         <span class="input-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
                         </span>
                         <input type="text" id="name" name="name" placeholder="أحمد محمد المدير" required autocomplete="name" aria-describedby="nameError" />
                     </div>
@@ -384,7 +482,10 @@
                     <label for="email">البريد الإلكتروني</label>
                     <div class="input-wrap" id="emailWrap">
                         <span class="input-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="m22 6-10 7L2 6" />
+                            </svg>
                         </span>
                         <input type="email" id="email" name="email" placeholder="admin@company.com" required autocomplete="email" aria-describedby="emailError" />
                     </div>
@@ -397,7 +498,10 @@
                     <label for="password">كلمة المرور</label>
                     <div class="input-wrap" id="passwordWrap">
                         <span class="input-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
                         </span>
                         <input type="password" id="password" name="password" placeholder="•••••••• (6 أحرف على الأقل)" required minlength="6" autocomplete="new-password" aria-describedby="passwordError" />
                         <button type="button" class="toggle-password" id="togglePassword" aria-label="إظهار/إخفاء كلمة المرور">
@@ -413,7 +517,10 @@
                     <label for="confirmPassword">تأكيد كلمة المرور</label>
                     <div class="input-wrap" id="confirmPasswordWrap">
                         <span class="input-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
                         </span>
                         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="أعد كتابة كلمة المرور" required minlength="6" autocomplete="new-password" aria-describedby="confirmPasswordError" />
                         <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="إظهار/إخفاء كلمة المرور">
@@ -429,7 +536,18 @@
                     <label for="companyName">اسم الشركة</label>
                     <div class="input-wrap" id="companyWrap">
                         <span class="input-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M16 18h.01"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="2" width="16" height="20" rx="2" />
+                                <path d="M9 22v-4h6v4" />
+                                <path d="M8 6h.01" />
+                                <path d="M16 6h.01" />
+                                <path d="M8 10h.01" />
+                                <path d="M16 10h.01" />
+                                <path d="M8 14h.01" />
+                                <path d="M16 14h.01" />
+                                <path d="M8 18h.01" />
+                                <path d="M16 18h.01" />
+                            </svg>
                         </span>
                         <input type="text" id="companyName" name="companyName" placeholder="شركة النور للتجارة" required autocomplete="organization" aria-describedby="companyError" />
                     </div>
@@ -457,7 +575,6 @@
         </div>
     </div>
 
-    <!-- Font Awesome للأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <script>
@@ -530,7 +647,9 @@
             ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
             ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
             this.appendChild(ripple);
-            setTimeout(function() { ripple.remove(); }, 650);
+            setTimeout(function() {
+                ripple.remove();
+            }, 650);
         });
 
         /**
@@ -551,6 +670,28 @@
 
         setupTogglePassword('password', 'togglePassword');
         setupTogglePassword('confirmPassword', 'toggleConfirmPassword');
+
+        /**
+         * ============================================================
+         * دالة التحقق من وجود الشركة
+         * ============================================================
+         */
+        async function checkCompanyExists(companyName) {
+            try {
+                var response = await fetch(SUPABASE_URL + '/rest/v1/companies?name=eq.' + encodeURIComponent(companyName) +
+                    '&select=id', {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY
+                        }
+                    });
+                if (!response.ok) return false;
+                var data = await response.json();
+                return data && data.length > 0;
+            } catch (error) {
+                console.error('❌ خطأ في التحقق من الشركة:', error);
+                return false;
+            }
+        }
 
         /**
          * ============================================================
@@ -620,7 +761,7 @@
 
         /**
          * ============================================================
-         * نموذج إنشاء حساب
+         * نموذج إنشاء حساب مع منع تكرار الشركة
          * ============================================================
          */
         var registerForm = document.getElementById('registerForm');
@@ -715,6 +856,26 @@
             var createdUserId = null;
 
             try {
+                // ============================================================
+                // التحقق من وجود الشركة قبل أي شيء
+                // ============================================================
+                console.log('📤 جاري التحقق من وجود الشركة:', companyName);
+                var companyExists = await checkCompanyExists(companyName);
+
+                if (companyExists) {
+                    console.warn('⚠️ الشركة موجودة بالفعل:', companyName);
+                    messageDiv.className = 'message error';
+                    messageDiv.innerHTML = '⚠️ هذه الشركة مسجلة بالفعل. يرجى التواصل مع مدير الشركة.';
+                    registerBtn.disabled = false;
+                    registerBtn.classList.remove('loading');
+                    btnLabel.textContent = 'إنشاء الحساب';
+                    return;
+                }
+                console.log('✅ الشركة غير موجودة، يمكن التسجيل');
+
+                // ============================================================
+                // 1. إنشاء المستخدم في Supabase Auth
+                // ============================================================
                 console.log('📤 1. إنشاء المستخدم في Auth...');
                 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: {
@@ -751,6 +912,9 @@
                 createdUserId = data.user.id;
                 console.log('✅ تم إنشاء المستخدم:', createdUserId);
 
+                // ============================================================
+                // 2. إنشاء الشركة الجديدة
+                // ============================================================
                 console.log('📤 2. إنشاء الشركة...');
                 var newCompany = await createCompany(companyName);
                 if (!newCompany) {
@@ -759,10 +923,16 @@
                 createdCompanyId = newCompany.id;
                 console.log('✅ تم إنشاء الشركة:', createdCompanyId);
 
+                // ============================================================
+                // 3. إنشاء البروفايل في جدول profiles
+                // ============================================================
                 console.log('📤 3. إنشاء البروفايل...');
                 await createProfile(data.user.id, name, email, newCompany.id, companyName, 'admin');
                 console.log('✅ تم إنشاء البروفايل');
 
+                // ============================================================
+                // 4. حفظ الجلسة
+                // ============================================================
                 localStorage.setItem('rollex_session', JSON.stringify(data.session));
                 console.log('✅ تم حفظ الجلسة');
 
@@ -776,7 +946,9 @@
             } catch (error) {
                 console.error('❌ خطأ:', error);
 
-                // التراجع (Rollback)
+                // ============================================================
+                // التراجع (Rollback) - حذف أي بيانات اتنشأت
+                // ============================================================
                 if (createdUserId) {
                     console.log('🗑️ جاري حذف المستخدم (تراجع)...');
                     try {
