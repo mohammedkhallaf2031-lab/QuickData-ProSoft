@@ -425,7 +425,7 @@
         setupTogglePassword('confirmPassword', 'toggleConfirmPassword');
 
         // ============================================================
-        // REGISTER FORM
+        // REGISTER FORM - مع كاش لتقليل الطلبات
         // ============================================================
         var registerForm = document.getElementById('registerForm');
         var messageDiv = document.getElementById('message');
@@ -451,6 +451,11 @@
         var companyInput = document.getElementById('companyName');
         var companyWrap = document.getElementById('companyWrap');
         var companyError = document.getElementById('companyError');
+
+        // ============================================================
+        // CACHE FOR COMPANY CHECK
+        // ============================================================
+        var companyCheckCache = {};
 
         function validateEmail(value) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -480,20 +485,43 @@
             }
         });
 
+        // ============================================================
+        // CHECK COMPANY EXISTS (مع كاش)
+        // ============================================================
         async function checkCompanyExists(companyName) {
+            // التحقق من الكاش
+            if (companyCheckCache[companyName] !== undefined) {
+                console.log('📦 استخدام الكاش للشركة:', companyName);
+                return companyCheckCache[companyName];
+            }
+
             try {
+                console.log('📤 جاري التحقق من وجود الشركة:', companyName);
                 var response = await fetch(SUPABASE_URL + '/rest/v1/companies?name=eq.' + encodeURIComponent(companyName) + '&select=id', {
                     headers: { 'apikey': SUPABASE_ANON_KEY }
                 });
-                if (!response.ok) return false;
+                
+                if (!response.ok) {
+                    console.warn('⚠️ فشل التحقق من الشركة، status:', response.status);
+                    companyCheckCache[companyName] = false;
+                    return false;
+                }
+                
                 var data = await response.json();
-                return data && data.length > 0;
+                var exists = data && data.length > 0;
+                companyCheckCache[companyName] = exists;
+                console.log('✅ نتيجة التحقق:', exists);
+                return exists;
             } catch (error) {
                 console.error('❌ خطأ في التحقق من الشركة:', error);
+                companyCheckCache[companyName] = false;
                 return false;
             }
         }
 
+        // ============================================================
+        // CREATE COMPANY
+        // ============================================================
         async function createCompany(companyName) {
             var response = await fetch(SUPABASE_URL + '/rest/v1/companies', {
                 method: 'POST',
@@ -519,9 +547,18 @@
             return data && data.length > 0 ? data[0] : null;
         }
 
+        // ============================================================
+        // CREATE PROFILE
+        // ============================================================
         async function createProfile(userId, name, email, companyId, companyName, role) {
             var token = getToken();
-            if (!token) throw new Error('لا يوجد توكن');
+            if (!token) {
+                console.warn('⚠️ لا يوجد توكن، محاولة الحصول على توكن جديد...');
+                // انتظر شوية عشان التوكن يظهر
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                token = getToken();
+                if (!token) throw new Error('لا يوجد توكن');
+            }
             
             var response = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
                 method: 'POST',
@@ -550,6 +587,9 @@
             return await response.json();
         }
 
+        // ============================================================
+        // SUBMIT FORM
+        // ============================================================
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -606,6 +646,7 @@
                 }
                 console.log('✅ تم إنشاء الشركة:', newCompany);
 
+                // استخدام supabase الموجود
                 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: {
                         autoRefreshToken: true,
@@ -641,12 +682,16 @@
                 }
                 console.log('✅ تم إنشاء المستخدم:', data.user.id);
 
+                // حفظ الجلسة
+                localStorage.setItem('rollex_session', JSON.stringify(data.session));
+                console.log('✅ تم حفظ الجلسة');
+
+                // انتظر شوية عشان التوكن يظهر
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 console.log('📤 إنشاء البروفايل...');
                 await createProfile(data.user.id, name, email, newCompany.id, companyName, 'admin');
                 console.log('✅ تم إنشاء البروفايل');
-
-                localStorage.setItem('rollex_session', JSON.stringify(data.session));
-                console.log('✅ تم حفظ الجلسة');
 
                 messageDiv.className = 'message success';
                 messageDiv.innerHTML = '✅ تم إنشاء الحساب بنجاح! جاري التحويل...';
@@ -666,7 +711,7 @@
             btnLabel.textContent = 'إنشاء الحساب';
         });
 
-        console.log('📌 صفحة التسجيل - QuickData ProSoft');
+        console.log('📌 صفحة التسجيل - QuickData ProSoft (النسخة النهائية)');
     </script>
 
 </body>
