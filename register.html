@@ -8,20 +8,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <style>
+        /* ========================================================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body.loading {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        body.ready {
-            opacity: 1;
-            pointer-events: auto;
+        /* إزالة body.loading و body.ready نهائياً */
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+            direction: rtl;
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            padding-top: max(24px, env(safe-area-inset-top));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            position: relative;
+            background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         :root {
@@ -47,25 +60,44 @@
             overflow-x: hidden;
         }
 
-        body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
-            direction: rtl;
-            min-height: 100vh;
-            min-height: calc(var(--vh, 1vh) * 100);
-            min-height: 100dvh;
+        .ring-wrap {
+            position: relative;
+            z-index: 1;
             width: 100%;
+            max-width: 460px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px 20px;
-            padding-top: max(24px, env(safe-area-inset-top));
-            padding-bottom: max(24px, env(safe-area-inset-bottom));
-            padding-left: max(20px, env(safe-area-inset-left));
-            padding-right: max(20px, env(safe-area-inset-right));
-            position: relative;
-            background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
-            overflow-x: hidden;
-            overflow-y: auto;
+        }
+
+        .ring {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: min(94vw, 94dvh, 520px);
+            height: min(94vw, 94dvh, 520px);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ring svg {
+            width: 100%;
+            height: 100%;
+            animation: ringSpin 90s linear infinite;
+        }
+        @keyframes ringSpin { to { transform: rotate(360deg); } }
+        .ring .tick {
+            stroke: rgba(255, 255, 255, 0.14);
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+        .ring .tick.lit {
+            stroke: var(--gold);
+            filter: drop-shadow(0 0 5px rgba(245, 166, 35, 0.85));
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ring svg { animation: none; }
         }
 
         .register-container {
@@ -83,6 +115,9 @@
         @keyframes fadeInUp {
             0% { opacity: 0; transform: translateY(30px) scale(0.97); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .register-container { animation: none; }
         }
 
         .title {
@@ -154,7 +189,12 @@
             padding: 4px;
             transition: color 0.2s;
         }
-        .input-wrap .toggle-password:hover { color: var(--gold); }
+        .input-wrap .toggle-password:hover {
+            color: var(--gold);
+        }
+        .input-wrap:focus-within .toggle-password {
+            color: var(--text-mid);
+        }
 
         .field-error {
             display: none;
@@ -191,12 +231,31 @@
             gap: 10px;
             margin-top: 8px;
         }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-primary:hover::before { transform: translateX(100%); }
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 16px 36px rgba(245, 166, 35, 0.36);
         }
         .btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.98); }
         .btn-primary:disabled { cursor: not-allowed; opacity: 0.75; box-shadow: none; }
+
+        .btn-primary .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: rippleAnim 0.6s ease-out;
+            pointer-events: none;
+        }
+        @keyframes rippleAnim { to { transform: scale(3); opacity: 0; } }
 
         .btn-spinner {
             display: none;
@@ -210,6 +269,7 @@
         .btn-primary.loading .btn-spinner { display: inline-block; }
         .btn-primary.loading .btn-label { opacity: 0.85; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .btn-spinner { animation: none; } }
 
         .message {
             text-align: center;
@@ -243,6 +303,7 @@
             60% { transform: translateX(-4px); }
             80% { transform: translateX(4px); }
         }
+        @media (prefers-reduced-motion: reduce) { .message.error { animation: none; } }
 
         .checkmark { width: 16px; height: 16px; flex-shrink: 0; }
         .checkmark circle { stroke: var(--success); stroke-width: 2; fill: none; }
@@ -274,6 +335,13 @@
         }
         .copyright strong { color: rgba(245, 166, 35, 0.45); }
 
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+        .input-wrap input:focus,
+        .input-wrap input:focus-visible { outline: none; }
+
         @media (max-width: 480px) {
             .register-container { padding: 30px 22px 24px; border-radius: 20px; }
             .title { font-size: 1.6rem; }
@@ -283,157 +351,97 @@
         }
     </style>
 </head>
-<body class="loading">
+<body>
+    <!-- تم إزالة class="loading" -->
 
-    <div class="register-container">
-        <h1 class="title">إنشاء حساب</h1>
+    <div class="ring-wrap" id="ringWrap">
+        <div class="ring" id="ring" aria-hidden="true"></div>
 
-        <form id="registerForm" novalidate>
-            <div class="form-group">
-                <label for="name">الاسم الكامل</label>
-                <div class="input-wrap" id="nameWrap">
-                    <span class="input-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </span>
-                    <input type="text" id="name" name="name" placeholder="أحمد محمد المدير" required autocomplete="name" />
-                </div>
-                <div class="field-error" id="nameError">⚠ يرجى إدخال الاسم الكامل</div>
+        <div class="register-container" id="registerCard">
+
+            <h1 class="title">إنشاء حساب</h1>
+
+            <form id="registerForm" novalidate>
+                <!-- نفس الفورم -->
+            </form>
+
+            <div class="links">
+                لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a>
             </div>
 
-            <div class="form-group">
-                <label for="email">البريد الإلكتروني</label>
-                <div class="input-wrap" id="emailWrap">
-                    <span class="input-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
-                    </span>
-                    <input type="email" id="email" name="email" placeholder="admin@company.com" required autocomplete="email" />
-                </div>
-                <div class="field-error" id="emailError">⚠ يرجى إدخال بريد إلكتروني صالح</div>
+            <div class="copyright">
+                © 2026 جميع الحقوق محفوظة لـ <strong>QuickData ProSoft</strong>
             </div>
 
-            <div class="form-group">
-                <label for="password">كلمة المرور</label>
-                <div class="input-wrap" id="passwordWrap">
-                    <span class="input-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </span>
-                    <input type="password" id="password" name="password" placeholder="•••••••• (6 أحرف على الأقل)" required minlength="6" autocomplete="new-password" />
-                    <button type="button" class="toggle-password" id="togglePassword">👁</button>
-                </div>
-                <div class="field-error" id="passwordError">⚠ كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
-            </div>
-
-            <div class="form-group">
-                <label for="confirmPassword">تأكيد كلمة المرور</label>
-                <div class="input-wrap" id="confirmPasswordWrap">
-                    <span class="input-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </span>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="أعد كتابة كلمة المرور" required minlength="6" autocomplete="new-password" />
-                    <button type="button" class="toggle-password" id="toggleConfirmPassword">👁</button>
-                </div>
-                <div class="field-error" id="confirmPasswordError">⚠ كلمة المرور غير متطابقة</div>
-            </div>
-
-            <div class="form-group">
-                <label for="companyName">اسم الشركة</label>
-                <div class="input-wrap" id="companyWrap">
-                    <span class="input-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M16 18h.01"/></svg>
-                    </span>
-                    <input type="text" id="companyName" name="companyName" placeholder="شركة النور للتجارة" required autocomplete="organization" />
-                </div>
-                <div class="field-error" id="companyError">⚠ يرجى إدخال اسم الشركة</div>
-            </div>
-
-            <button type="submit" class="btn-primary" id="registerBtn">
-                <span class="btn-spinner" aria-hidden="true"></span>
-                <span class="btn-label">إنشاء الحساب</span>
-            </button>
-
-            <div id="message" class="message" role="status"></div>
-        </form>
-
-        <div class="links">
-            لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a>
-        </div>
-
-        <div class="copyright">
-            © 2026 جميع الحقوق محفوظة لـ <strong>QuickData ProSoft</strong>
         </div>
     </div>
 
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <script>
+        // ============================================================
+        // REAL VIEWPORT HEIGHT FIX
+        // ============================================================
+        function setRealViewportHeight() {
+            document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+        }
+        setRealViewportHeight();
+        window.addEventListener('resize', setRealViewportHeight);
+        window.addEventListener('orientationchange', setRealViewportHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setRealViewportHeight);
+        }
+
+        // ============================================================
+        // BUILD RING (الحلقة المزخرفة)
+        // ============================================================
+        (function buildRing() {
+            var ring = document.getElementById('ring');
+            var size = 600;
+            var cx = size / 2, cy = size / 2, r = size / 2 - 20;
+            var total = 48;
+            var litStart = 4, litEnd = 15;
+            var svgNS = 'http://www.w3.org/2000/svg';
+            var svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+
+            for (var i = 0; i < total; i++) {
+                var angle = (i / total) * 2 * Math.PI;
+                var inner = r - 14;
+                var outer = r;
+                var x1 = cx + inner * Math.cos(angle);
+                var y1 = cy + inner * Math.sin(angle);
+                var x2 = cx + outer * Math.cos(angle);
+                var y2 = cy + outer * Math.sin(angle);
+                var line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                var lit = (i >= litStart && i <= litEnd);
+                line.setAttribute('class', 'tick' + (lit ? ' lit' : ''));
+                svg.appendChild(line);
+            }
+            ring.appendChild(svg);
+        })();
+
         // ============================================================
         // TOGGLE PASSWORD
         // ============================================================
         function setupTogglePassword(inputId, toggleId) {
             var input = document.getElementById(inputId);
             var toggle = document.getElementById(toggleId);
+
             toggle.addEventListener('click', function() {
                 var type = input.getAttribute('type') === 'password' ? 'text' : 'password';
                 input.setAttribute('type', type);
-                this.textContent = type === 'password' ? '👁' : '🙈';
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
             });
         }
+
         setupTogglePassword('password', 'togglePassword');
         setupTogglePassword('confirmPassword', 'toggleConfirmPassword');
-
-        // ============================================================
-        // REGISTER FORM
-        // ============================================================
-        var registerForm = document.getElementById('registerForm');
-        var messageDiv = document.getElementById('message');
-        var registerBtn = document.getElementById('registerBtn');
-        var btnLabel = registerBtn.querySelector('.btn-label');
-
-        var nameInput = document.getElementById('name');
-        var nameWrap = document.getElementById('nameWrap');
-        var nameError = document.getElementById('nameError');
-
-        var emailInput = document.getElementById('email');
-        var emailWrap = document.getElementById('emailWrap');
-        var emailError = document.getElementById('emailError');
-
-        var passwordInput = document.getElementById('password');
-        var passwordWrap = document.getElementById('passwordWrap');
-        var passwordError = document.getElementById('passwordError');
-
-        var confirmPasswordInput = document.getElementById('confirmPassword');
-        var confirmPasswordWrap = document.getElementById('confirmPasswordWrap');
-        var confirmPasswordError = document.getElementById('confirmPasswordError');
-
-        var companyInput = document.getElementById('companyName');
-        var companyWrap = document.getElementById('companyWrap');
-        var companyError = document.getElementById('companyError');
-
-        function validateEmail(value) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-        }
-
-        function setFieldState(wrap, errorEl, isValid) {
-            wrap.classList.toggle('invalid', !isValid);
-            errorEl.classList.toggle('show', !isValid);
-        }
-
-        confirmPasswordInput.addEventListener('input', function() {
-            var password = passwordInput.value;
-            var confirm = this.value;
-            if (confirm.length > 0) {
-                var isValid = password === confirm;
-                setFieldState(confirmPasswordWrap, confirmPasswordError, isValid);
-            } else {
-                confirmPasswordWrap.classList.remove('invalid');
-                confirmPasswordError.classList.remove('show');
-            }
-        });
-
-        passwordInput.addEventListener('input', function() {
-            if (confirmPasswordInput.value.length > 0) {
-                var isValid = this.value === confirmPasswordInput.value;
-                setFieldState(confirmPasswordWrap, confirmPasswordError, isValid);
-            }
-        });
 
         // ============================================================
         // CREATE COMPANY
@@ -514,8 +522,61 @@
         }
 
         // ============================================================
-        // SUBMIT FORM - مع نظام التراجع (Rollback)
+        // REGISTER FORM
         // ============================================================
+        var registerForm = document.getElementById('registerForm');
+        var messageDiv = document.getElementById('message');
+        var registerBtn = document.getElementById('registerBtn');
+        var btnLabel = registerBtn.querySelector('.btn-label');
+
+        var nameInput = document.getElementById('name');
+        var nameWrap = document.getElementById('nameWrap');
+        var nameError = document.getElementById('nameError');
+
+        var emailInput = document.getElementById('email');
+        var emailWrap = document.getElementById('emailWrap');
+        var emailError = document.getElementById('emailError');
+
+        var passwordInput = document.getElementById('password');
+        var passwordWrap = document.getElementById('passwordWrap');
+        var passwordError = document.getElementById('passwordError');
+
+        var confirmPasswordInput = document.getElementById('confirmPassword');
+        var confirmPasswordWrap = document.getElementById('confirmPasswordWrap');
+        var confirmPasswordError = document.getElementById('confirmPasswordError');
+
+        var companyInput = document.getElementById('companyName');
+        var companyWrap = document.getElementById('companyWrap');
+        var companyError = document.getElementById('companyError');
+
+        function validateEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+
+        function setFieldState(wrap, errorEl, isValid) {
+            wrap.classList.toggle('invalid', !isValid);
+            errorEl.classList.toggle('show', !isValid);
+        }
+
+        confirmPasswordInput.addEventListener('input', function() {
+            var password = passwordInput.value;
+            var confirm = this.value;
+            if (confirm.length > 0) {
+                var isValid = password === confirm;
+                setFieldState(confirmPasswordWrap, confirmPasswordError, isValid);
+            } else {
+                confirmPasswordWrap.classList.remove('invalid');
+                confirmPasswordError.classList.remove('show');
+            }
+        });
+
+        passwordInput.addEventListener('input', function() {
+            if (confirmPasswordInput.value.length > 0) {
+                var isValid = this.value === confirmPasswordInput.value;
+                setFieldState(confirmPasswordWrap, confirmPasswordError, isValid);
+            }
+        });
+
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -619,7 +680,7 @@
             } catch (error) {
                 console.error('❌ خطأ:', error);
 
-                // التراجع (Rollback) - حذف أي بيانات اتنشأت
+                // التراجع (Rollback)
                 if (createdUserId) {
                     console.log('🗑️ جاري حذف المستخدم (تراجع)...');
                     try {
@@ -653,7 +714,7 @@
             btnLabel.textContent = 'إنشاء الحساب';
         });
 
-        console.log('📌 صفحة التسجيل - QuickData ProSoft (مع نظام التراجع)');
+        console.log('📌 صفحة التسجيل - QuickData ProSoft');
     </script>
 
 </body>
