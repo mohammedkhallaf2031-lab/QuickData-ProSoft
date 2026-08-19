@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <style>
-        /* ===== نفس الـ CSS الموجود ===== */
         * {
             margin: 0;
             padding: 0;
@@ -52,11 +51,17 @@
             font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
             direction: rtl;
             min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+            min-height: 100dvh;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px 20px;
+            padding-top: max(24px, env(safe-area-inset-top));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
             position: relative;
             background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
             overflow-x: hidden;
@@ -618,7 +623,6 @@
                 if (createdUserId) {
                     console.log('🗑️ جاري حذف المستخدم (تراجع)...');
                     try {
-                        // حذف البروفايل
                         await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + createdUserId, {
                             method: 'DELETE',
                             headers: {
@@ -626,8 +630,6 @@
                                 'Authorization': 'Bearer ' + getToken()
                             }
                         });
-                        // حذف المستخدم من Auth (لو ممكن)
-                        // ملاحظة: حذف المستخدم من Auth يحتاج service_role key
                     } catch (e) {
                         console.warn('⚠️ فشل حذف المستخدم:', e.message);
                     }
