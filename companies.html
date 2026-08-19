@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>إدارة الشركات · QuickData ProSoft</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="supabase-client.js"></script>
+    <style>
+        :root {
+            --canvas: #f6f3ec;
+            --surface: #ffffff;
+            --surface-2: #fbf9f4;
+            --line: rgba(33, 29, 26, 0.11);
+            --line-soft: rgba(33, 29, 26, 0.06);
+            --ink: #211d1a;
+            --ink-2: #6e645a;
+            --ink-3: #a69c90;
+            --ink-4: #d8d0c4;
+            --gold: #b3813a;
+            --gold-light: #f1e0ba;
+            --gold-dark: #8a611f;
+            --gold-glow: rgba(179, 129, 58, 0.11);
+            --gold-gradient: linear-gradient(135deg, #d3a25a 0%, #b3813a 48%, #8a611f 100%);
+            --navy: #212b42;
+            --navy-gradient: linear-gradient(135deg, #384464 0%, #212b42 100%);
+            --teal: #1d7b6c;
+            --teal-soft: #e2f2ee;
+            --rust: #bf4f30;
+            --rust-soft: #fbe8e1;
+            --sidebar-w: 270px;
+            --header-h: 68px;
+            --r-lg: 18px;
+            --r-md: 12px;
+            --r-sm: 8px;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+            background: var(--canvas);
+            color: var(--ink);
+            direction: rtl;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { font-family: inherit; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 10px; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(33, 29, 26, 0.4);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity .25s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--surface-2);
+            border-left: 1px solid var(--line);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: right .35s var(--ease);
+        }
+        .sidebar.collapsed { right: calc(-1 * var(--sidebar-w)); }
+
+        .sidebar .brand {
+            padding: 24px 22px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--line);
+            background: var(--navy-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        .sidebar .brand::before {
+            content: '';
+            position: absolute;
+            inset: -40% -10%;
+            background: linear-gradient(115deg, transparent 38%, rgba(211, 162, 90, 0.55) 48%, rgba(179, 129, 58, 0.25) 54%, transparent 62%);
+            pointer-events: none;
+        }
+        .sidebar .brand::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gold-gradient);
+        }
+        .sidebar .brand .mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(211, 162, 90, 0.4);
+            color: var(--gold-light);
+            position: relative;
+            z-index: 1;
+        }
+        .sidebar .brand .text {
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: #fff;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+        }
+        .sidebar .brand .text span {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+
+        .sidebar .menu {
+            flex: 1;
+            padding: 14px 12px;
+        }
+        .sidebar .menu .label {
+            font-size: 0.6rem;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 10px 6px;
+            font-weight: 700;
+        }
+        .sidebar .menu .label:first-child { padding-top: 4px; }
+
+        .sidebar .menu .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--r-sm);
+            color: var(--ink-2);
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: background .15s ease, color .15s ease;
+            cursor: pointer;
+            margin-bottom: 2px;
+            position: relative;
+            border-inline-end: 3px solid transparent;
+        }
+        .sidebar .menu .item:hover {
+            background: rgba(33, 29, 26, 0.04);
+            color: var(--ink);
+        }
+        .sidebar .menu .item.active {
+            background: var(--surface);
+            color: var(--ink);
+            box-shadow: 0 2px 10px rgba(33, 29, 26, 0.08);
+            border-inline-end: 3px solid var(--swatch, var(--ink));
+        }
+        .sidebar .menu .item i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.86rem;
+            opacity: 0.8;
+        }
+
+        .sidebar .footer {
+            padding: 14px 18px 20px;
+            border-top: 1px solid var(--line);
+        }
+        .sidebar .footer .user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar .footer .user .avatar {
+            width: 33px;
+            height: 33px;
+            border-radius: var(--r-sm);
+            background: var(--gold-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .sidebar .footer .user .info .name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .sidebar .footer .user .info .role {
+            font-size: 0.62rem;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+        .sidebar .footer .logout {
+            margin-right: auto;
+            width: 28px;
+            height: 28px;
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-3);
+            border: 1px solid var(--line);
+            transition: .15s;
+            cursor: pointer;
+            background: transparent;
+        }
+        .sidebar .footer .logout:hover {
+            color: var(--rust);
+            border-color: var(--rust);
+        }
+
+        .main {
+            margin-right: var(--sidebar-w);
+            min-height: 100vh;
+            transition: margin-right .35s var(--ease);
+        }
+        .main.expanded { margin-right: 0; }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: var(--header-h);
+            padding: 0 30px;
+            background: rgba(246, 243, 236, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header .hamburger {
+            display: flex;
+            width: 34px;
+            height: 34px;
+            border-radius: var(--r-sm);
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: .15s;
+        }
+        .header .hamburger:hover {
+            border-color: var(--ink-3);
+            color: var(--ink);
+        }
+        .header .breadcrumb {
+            font-size: 0.79rem;
+            color: var(--ink-3);
+        }
+        .header .breadcrumb b {
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .header .right {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .header .right .profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 12px 3px 5px;
+            border-radius: 50px;
+            border: 1px solid var(--line);
+            cursor: pointer;
+            transition: .15s;
+            background: var(--surface);
+        }
+        .header .right .profile:hover {
+            border-color: var(--ink-3);
+        }
+        .header .right .profile .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+        .header .right .profile .name {
+            font-size: 0.77rem;
+            font-weight: 700;
+        }
+        .header .right .profile .name small {
+            display: block;
+            font-size: 0.58rem;
+            font-weight: 500;
+            color: var(--ink-3);
+        }
+
+        .dash {
+            padding: 26px 30px 44px;
+            max-width: 1500px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-header h1 i { color: var(--gold); }
+        .page-header .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-2);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Cairo', sans-serif;
+        }
+        .btn-action:hover {
+            background: var(--surface-2);
+            border-color: var(--ink-3);
+        }
+        .btn-action.primary {
+            background: var(--gold-gradient);
+            color: #fff;
+            border: none;
+        }
+        .btn-action.primary:hover {
+            background: var(--navy-gradient);
+            color: #fff;
+        }
+
+        .table-wrapper {
+            background: var(--surface);
+            border-radius: var(--r-lg);
+            overflow-x: auto;
+            border: 1px solid var(--line);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.72rem;
+            min-width: 900px;
+        }
+        th {
+            background: var(--surface-2);
+            color: var(--ink-3);
+            padding: 12px 14px;
+            text-align: right;
+            font-weight: 700;
+            white-space: nowrap;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid var(--line);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--line);
+            color: var(--ink-2);
+            font-size: 0.72rem;
+        }
+        tr:hover td { background: var(--surface-2); }
+
+        .badge-status {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.58rem;
+            font-weight: 700;
+        }
+        .badge-status.trial {
+            background: var(--gold-glow);
+            color: var(--gold-dark);
+        }
+        .badge-status.active {
+            background: var(--teal-soft);
+            color: var(--teal);
+        }
+        .badge-status.expired {
+            background: var(--rust-soft);
+            color: var(--rust);
+        }
+        .badge-status.suspended {
+            background: #fef3c7;
+            color: #b7791f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink-3);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gold);
+        }
+        .loading-state i {
+            animation: spin 1s linear infinite;
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(33, 29, 26, 0.55);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border-radius: var(--r-lg);
+            max-width: 520px;
+            width: 100%;
+            padding: 28px;
+            border: 1px solid var(--line);
+            box-shadow: 0 16px 40px rgba(33, 29, 26, 0.12);
+            animation: modalIn 0.25s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-box .modal-header h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-box .modal-header h3 i { color: var(--gold); }
+        .modal-box .modal-header .close-modal {
+            background: none;
+            border: none;
+            color: var(--ink-3);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--r-sm);
+            transition: .15s;
+        }
+        .modal-box .modal-header .close-modal:hover {
+            background: var(--surface-2);
+            color: var(--ink);
+        }
+
+        .modal-box .form-group {
+            margin-bottom: 14px;
+        }
+        .modal-box .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--ink-2);
+            margin-bottom: 4px;
+        }
+        .modal-box .form-group label .required { color: var(--rust); }
+        .modal-box .form-group input,
+        .modal-box .form-group select,
+        .modal-box .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--line);
+            background: var(--surface-2);
+            color: var(--ink);
+            font-size: 0.85rem;
+            font-family: 'Cairo', sans-serif;
+            outline: none;
+            transition: .15s;
+        }
+        .modal-box .form-group input:focus,
+        .modal-box .form-group select:focus,
+        .modal-box .form-group textarea:focus {
+            border-color: var(--gold);
+            background: #fff;
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+        .modal-box .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .modal-box .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-box .form-actions .btn-save {
+            padding: 10px 28px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: var(--r-sm);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: .15s;
+            font-family: 'Cairo', sans-serif;
+            flex: 1;
+        }
+        .modal-box .form-actions .btn-save:hover {
+            background: #156b5d;
+            transform: translateY(-1px);
+        }
+        .modal-box .form-actions .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .modal-box .form-actions .btn-cancel {
+            padding: 10px 24px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: .15s;
+            font-family: 'Cairo', sans-serif;
+        }
+        .modal-box .form-actions .btn-cancel:hover {
+            background: var(--surface-2);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                right: calc(-1 * var(--sidebar-w));
+            }
+            .sidebar.open { right: 0; }
+            .sidebar-overlay { display: block; }
+            .main { margin-right: 0 !important; }
+            .dash { padding: 18px 16px 34px; }
+            .header { padding: 0 16px; }
+            .header .right .profile .name { display: none; }
+            .header .hamburger { width: 42px; height: 42px; font-size: 1rem; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .page-header .actions .btn-action { flex: 1; justify-content: center; }
+            table { font-size: 0.6rem; min-width: 700px; }
+            th, td { padding: 6px 8px; }
+            .modal-box { padding: 20px; margin: 10px; }
+            .modal-box .form-actions { flex-direction: column; }
+            .modal-box .form-actions .btn-save,
+            .modal-box .form-actions .btn-cancel { width: 100%; justify-content: center; }
+        }
+        @media (min-width: 769px) {
+            .hamburger { display: none !important; }
+            .sidebar-overlay { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="mark"><i class="fas fa-paint-roller"></i></div>
+            <div class="text">
+                نظام الإدارة
+                <span>QuickData ProSoft</span>
+            </div>
+        </div>
+
+        <div class="menu">
+            <div class="label">القائمة الرئيسية</div>
+            <a href="index.html" class="item"><i class="fas fa-house"></i> الرئيسية</a>
+
+            <div class="label">الإدارة</div>
+            <a href="companies.html" class="item active" style="--swatch:var(--gold)"><i class="fas fa-building"></i> الشركات</a>
+            <a href="users.html" class="item" style="--swatch:var(--navy)"><i class="fas fa-users"></i> المستخدمين</a>
+
+            <div class="label">الإعدادات</div>
+            <a href="#" class="item"><i class="fas fa-gear"></i> الإعدادات</a>
+            <a href="#" class="item"><i class="fas fa-circle-question"></i> المساعدة</a>
+        </div>
+
+        <div class="footer">
+            <div class="user">
+                <div class="avatar" id="sidebarAvatar">م</div>
+                <div class="info">
+                    <div class="name" id="userName">مستخدم</div>
+                    <div class="role" id="userRole">موظف</div>
+                </div>
+                <button class="logout" onclick="logout()" title="تسجيل الخروج">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main" id="main">
+
+        <header class="header">
+            <div class="left">
+                <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                <div class="breadcrumb"><b>الإدارة</b> / الشركات</div>
+            </div>
+            <div class="right">
+                <div class="profile">
+                    <div class="avatar" id="headerAvatar">م</div>
+                    <div class="name" id="headerName">مستخدم<small id="headerRole">موظف</small></div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <button onclick="logout()" title="تسجيل الخروج" style="background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:1rem;padding:4px 8px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="dash">
+
+            <div class="page-header">
+                <h1><i class="fas fa-building"></i> إدارة الشركات</h1>
+                <div class="actions">
+                    <button class="btn-action primary" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> شركة جديدة
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم الشركة</th>
+                            <th>النطاق الفرعي</th>
+                            <th>الحالة</th>
+                            <th>الفترة التجريبية</th>
+                            <th style="text-align:center;">الحد الأقصى للمستخدمين</th>
+                            <th style="text-align:center;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesBody">
+                        <tr>
+                            <td colspan="7">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner"></i>
+                                    <p>جاري تحميل البيانات...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ADD/EDIT MODAL ===== -->
+    <div class="modal-overlay" id="companyModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-building"></i> <span id="modalTitle">إضافة شركة جديدة</span></h3>
+                <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="companyForm" onsubmit="saveCompany(event)">
+                <input type="hidden" id="editId" value="" />
+                <div class="form-group">
+                    <label>اسم الشركة <span class="required">*</span></label>
+                    <input type="text" id="companyName" placeholder="مثال: شركة النور للتجارة" required />
+                </div>
+                <div class="form-group">
+                    <label>النطاق الفرعي</label>
+                    <input type="text" id="companySubdomain" placeholder="مثال: alnoor" />
+                    <div style="font-size:0.6rem;color:var(--ink-3);margin-top:4px;">سيتم إنشاؤه تلقائياً إذا ترك فارغاً</div>
+                </div>
+                <div class="form-group">
+                    <label>حالة الاشتراك</label>
+                    <select id="companyStatus">
+                        <option value="trial">تجريبي</option>
+                        <option value="active">نشط</option>
+                        <option value="expired">منتهي</option>
+                        <option value="suspended">موقوف</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ انتهاء الفترة التجريبية</label>
+                    <input type="date" id="companyTrialEnd" />
+                </div>
+                <div class="form-group">
+                    <label>الحد الأقصى للمستخدمين</label>
+                    <input type="number" id="companyMaxUsers" value="5" min="1" />
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="companyNotes" placeholder="ملاحظات إضافية..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save" id="submitBtn"><i class="fas fa-save"></i> حفظ</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // SIDEBAR TOGGLE
+        // ============================================================
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const hamburger = document.getElementById('hamburger');
+        const main = document.getElementById('main');
+        let mobileOpen = false;
+
+        function toggleSidebar() {
+            if (window.innerWidth <= 768) {
+                mobileOpen = !mobileOpen;
+                sidebar.classList.toggle('open', mobileOpen);
+                overlay.classList.toggle('active', mobileOpen);
+                document.body.style.overflow = mobileOpen ? 'hidden' : '';
+                hamburger.innerHTML = mobileOpen ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
+            } else {
+                const nowCollapsed = sidebar.classList.toggle('collapsed');
+                main.classList.toggle('expanded', nowCollapsed);
+            }
+        }
+        hamburger.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', () => {
+            if (window.innerWidth <= 768 && mobileOpen) toggleSidebar();
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                mobileOpen = false;
+                hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        async function logout() {
+            localStorage.removeItem('rollex_session');
+            sessionStorage.removeItem('rollex_session');
+            window.location.href = 'login.html';
+        }
+        window.logout = logout;
+
+        // ============================================================
+        // GET COMPANIES
+        // ============================================================
+        async function getCompanies() {
+            var token = getToken();
+            if (!token) return [];
+
+            try {
+                var response = await fetch(SUPABASE_URL + '/rest/v1/companies?select=*&order=name.asc', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                if (!response.ok) return [];
+                return await response.json();
+            } catch (error) {
+                console.error('❌ خطأ في جلب الشركات:', error);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // SAVE COMPANY
+        // ============================================================
+        async function saveCompany(event) {
+            event.preventDefault();
+
+            var id = document.getElementById('editId').value;
+            var data = {
+                name: document.getElementById('companyName').value.trim(),
+                subdomain: document.getElementById('companySubdomain').value.trim(),
+                subscription_status: document.getElementById('companyStatus').value,
+                trial_end_date: document.getElementById('companyTrialEnd').value || null,
+                max_users: parseInt(document.getElementById('companyMaxUsers').value) || 5,
+                notes: document.getElementById('companyNotes').value.trim()
+            };
+
+            if (!data.name) {
+                alert('يرجى إدخال اسم الشركة');
+                document.getElementById('companyName').focus();
+                return;
+            }
+
+            if (!data.subdomain) {
+                data.subdomain = data.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + Date.now().toString().slice(-6);
+            }
+
+            var btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري...';
+
+            var token = getToken();
+            if (!token) {
+                alert('جلسة منتهية');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> حفظ';
+                return;
+            }
+
+            try {
+                var url = SUPABASE_URL + '/rest/v1/companies';
+                var method = 'POST';
+                var payload = data;
+
+                if (id) {
+                    url += '?id=eq.' + id;
+                    method = 'PATCH';
+                    delete payload.subdomain;
+                }
+
+                var response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    var errorText = await response.text();
+                    throw new Error(errorText);
+                }
+
+                alert(id ? '✅ تم تعديل الشركة بنجاح' : '✅ تم إضافة الشركة بنجاح');
+                closeModal();
+                loadData();
+
+            } catch (error) {
+                console.error('❌ خطأ:', error);
+                alert('❌ ' + error.message);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> حفظ';
+        }
+
+        // ============================================================
+        // UPDATE COMPANY
+        // ============================================================
+        async function updateCompany(id, updates) {
+            var token = getToken();
+            if (!token) return;
+
+            try {
+                var response = await fetch(SUPABASE_URL + '/rest/v1/companies?id=eq.' + id, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(updates)
+                });
+                if (!response.ok) throw new Error('فشل التحديث');
+                return await response.json();
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الشركة:', error);
+                throw error;
+            }
+        }
+
+        // ============================================================
+        // DISPLAY COMPANIES
+        // ============================================================
+        function displayCompanies(companies) {
+            var tbody = document.getElementById('entriesBody');
+
+            if (!companies || companies.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-building"></i><p>لا توجد شركات مسجلة</p></div></td></tr>
+                `;
+                return;
+            }
+
+            var statusMap = {
+                'trial': 'تجريبي',
+                'active': 'نشط',
+                'expired': 'منتهي',
+                'suspended': 'موقوف'
+            };
+
+            var html = '';
+            companies.forEach(function(c, index) {
+                var statusClass = c.subscription_status || 'trial';
+                var trialDays = 0;
+                if (c.trial_end_date) {
+                    var end = new Date(c.trial_end_date);
+                    var today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    var diff = end.getTime() - today.getTime();
+                    trialDays = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+                }
+                var trialText = trialDays > 0 ? trialDays + ' يوم' : 'منتهية';
+
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td style="font-weight:700;">${c.name || '-'}</td>
+                        <td style="color:var(--ink-3);font-size:0.68rem;">${c.subdomain || '-'}</td>
+                        <td><span class="badge-status ${statusClass}">${statusMap[statusClass] || statusClass}</span></td>
+                        <td style="font-size:0.68rem;">${trialText}</td>
+                        <td style="text-align:center;">${c.max_users || 5}</td>
+                        <td style="text-align:center;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">
+                            <button class="btn-action" onclick="editCompany('${c.id}')" style="padding:4px 8px;font-size:0.6rem;background:var(--gold-glow);color:var(--gold-dark);border-color:var(--gold-glow);"><i class="fas fa-edit"></i></button>
+                            <button class="btn-action" onclick="extendTrial('${c.id}')" style="padding:4px 8px;font-size:0.6rem;background:var(--teal-soft);color:var(--teal);border-color:var(--teal-soft);"><i class="fas fa-calendar-plus"></i></button>
+                            <button class="btn-action" onclick="toggleStatus('${c.id}')" style="padding:4px 8px;font-size:0.6rem;background:var(--rust-soft);color:var(--rust);border-color:var(--rust-soft);"><i class="fas fa-power-off"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ============================================================
+        // LOAD DATA
+        // ============================================================
+        async function loadData() {
+            var tbody = document.getElementById('entriesBody');
+            tbody.innerHTML = `
+                <tr><td colspan="7"><div class="loading-state"><i class="fas fa-spinner"></i><p>جاري تحميل البيانات...</p></div></td></tr>
+            `;
+
+            try {
+                var companies = await getCompanies();
+                displayCompanies(companies);
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                tbody.innerHTML = `
+                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ في تحميل البيانات</p></div></td></tr>
+                `;
+            }
+        }
+
+        // ============================================================
+        // MODAL FUNCTIONS
+        // ============================================================
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة شركة جديدة';
+            document.getElementById('editId').value = '';
+            document.getElementById('companyForm').reset();
+            document.getElementById('companyStatus').value = 'trial';
+            document.getElementById('companyMaxUsers').value = '5';
+            var today = new Date();
+            var endDate = new Date(today);
+            endDate.setDate(today.getDate() + 15);
+            document.getElementById('companyTrialEnd').value = endDate.toISOString().split('T')[0];
+            document.getElementById('companyModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function editCompany(id) {
+            document.getElementById('modalTitle').textContent = 'تعديل الشركة';
+            document.getElementById('editId').value = id;
+
+            getCompanies().then(function(companies) {
+                var company = companies.find(function(c) { return c.id == id; });
+                if (company) {
+                    document.getElementById('companyName').value = company.name || '';
+                    document.getElementById('companySubdomain').value = company.subdomain || '';
+                    document.getElementById('companyStatus').value = company.subscription_status || 'trial';
+                    document.getElementById('companyMaxUsers').value = company.max_users || 5;
+                    document.getElementById('companyNotes').value = company.notes || '';
+                    if (company.trial_end_date) {
+                        document.getElementById('companyTrialEnd').value = company.trial_end_date.split('T')[0];
+                    }
+                }
+            });
+
+            document.getElementById('companyModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('companyModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================================
+        // EXTEND TRIAL
+        // ============================================================
+        function extendTrial(id) {
+            if (!confirm('هل تريد تمديد الفترة التجريبية لهذه الشركة لمدة 15 يوم إضافية؟')) return;
+
+            var today = new Date();
+            var newEnd = new Date(today);
+            newEnd.setDate(today.getDate() + 15);
+
+            updateCompany(id, {
+                trial_end_date: newEnd.toISOString().split('T')[0],
+                subscription_status: 'trial'
+            }).then(function() {
+                alert('✅ تم تمديد الفترة التجريبية لمدة 15 يوم');
+                loadData();
+            }).catch(function(error) {
+                alert('❌ ' + error.message);
+            });
+        }
+
+        // ============================================================
+        // TOGGLE STATUS
+        // ============================================================
+        function toggleStatus(id) {
+            var newStatus = confirm('هل تريد تغيير حالة الشركة؟ انقر موافق للتبديل بين نشط وموقوف') ? 'active' : 'suspended';
+            if (!confirm('هل أنت متأكد من تغيير حالة الشركة؟')) return;
+
+            updateCompany(id, {
+                subscription_status: newStatus
+            }).then(function() {
+                alert('✅ تم تغيير حالة الشركة بنجاح');
+                loadData();
+            }).catch(function(error) {
+                alert('❌ ' + error.message);
+            });
+        }
+
+        // ============================================================
+        // CLOSE MODAL ON OVERLAY CLICK
+        // ============================================================
+        document.getElementById('companyModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================================
+        // EXPOSE
+        // ============================================================
+        window.openAddModal = openAddModal;
+        window.editCompany = editCompany;
+        window.closeModal = closeModal;
+        window.extendTrial = extendTrial;
+        window.toggleStatus = toggleStatus;
+        window.loadData = loadData;
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        (async function init() {
+            console.log('🏢 صفحة إدارة الشركات - QuickData ProSoft');
+
+            var token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // تحديث معلومات المستخدم
+            try {
+                var profile = await getCurrentUserProfile();
+                if (profile) {
+                    document.getElementById('userName').textContent = profile.name || 'مستخدم';
+                    document.getElementById('userRole').textContent = profile.is_super_admin ? 'مدير النظام' : (profile.role || 'موظف');
+                    document.getElementById('headerAvatar').textContent = (profile.name || 'م')[0];
+                    document.getElementById('sidebarAvatar').textContent = (profile.name || 'م')[0];
+                    var headerName = document.getElementById('headerName');
+                    var roleText = profile.is_super_admin ? 'مدير النظام' : (profile.role || 'موظف');
+                    headerName.innerHTML = (profile.name || 'مستخدم') + '<small>' + roleText + '</small>';
+                }
+            } catch (error) {
+                console.warn('⚠️ فشل تحديث معلومات المستخدم:', error.message);
+            }
+
+            await loadData();
+
+            setTimeout(function() {
+                startSessionMonitor();
+            }, 5000);
+        })();
+    </script>
+
+</body>
+</html>
