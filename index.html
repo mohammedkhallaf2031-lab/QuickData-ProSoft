@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickData ProSoft</title>
+    <script src="supabase-client.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f6f3ec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .logo {
+            color: #b3813a;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #6e645a;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            margin: 6px;
+            transition: 0.3s;
+        }
+        .btn-primary {
+            background: #b3813a;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #8a611f;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            border: 2px solid #b3813a;
+            color: #b3813a;
+        }
+        .btn-secondary:hover {
+            background: #b3813a;
+            color: white;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f1e0ba;
+            border-radius: 10px;
+            color: #8a611f;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">QuickData ProSoft</div>
+        <p class="subtitle">نظام إدارة متكامل للشركات</p>
+
+        <div>
+            <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
+            <a href="register.html" class="btn btn-secondary">إنشاء حساب</a>
+        </div>
+
+        <div class="status" id="statusMessage">⏳ جاري التحقق من الجلسة...</div>
+    </div>
+
+    <script>
+        (async function() {
+            var token = getToken();
+            var statusEl = document.getElementById('statusMessage');
+
+            if (token) {
+                var profile = await getCurrentUserProfile();
+                if (profile) {
+                    statusEl.innerHTML = '✅ مرحباً بك، ' + profile.name + '! جاري التوجيه...';
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    statusEl.innerHTML = '👤 جلسة غير صالحة، يرجى تسجيل الدخول';
+                }
+            } else {
+                statusEl.innerHTML = '👤 غير مسجل دخول. سجل دخول أو أنشئ حساب جديد.';
+            }
+        })();
+    </script>
+</body>
+</html>
