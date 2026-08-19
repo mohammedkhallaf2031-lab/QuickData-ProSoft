@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover" />
+    <title>انتهاء الفترة التجريبية - QuickData ProSoft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="supabase-client.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #f5a623;
+            --gold-light: #ffc857;
+            --gold-deep: #e08e0b;
+            --navy-bg: #1b2431;
+            --navy-bg-2: #141c27;
+            --card: #212c3b;
+            --field: #2a3646;
+            --field-border: #37455a;
+            --text-dim: rgba(255, 255, 255, 0.55);
+            --text-mid: rgba(255, 255, 255, 0.72);
+            --danger: #ff6b6b;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--navy-bg-2);
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+            direction: rtl;
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            position: relative;
+            background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .expired-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            background: var(--card);
+            border-radius: 22px;
+            padding: 48px 36px 36px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+            text-align: center;
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(30px) scale(0.97); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 107, 107, 0.12);
+            border: 2px solid rgba(255, 107, 107, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .icon-wrapper i {
+            font-size: 2.8rem;
+            color: var(--danger);
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-mid);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .info-card {
+            background: var(--field);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--field-border);
+        }
+        .info-card .label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-weight: 700;
+        }
+        .info-card .value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-deep));
+            color: #1b1204;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s;
+            font-family: inherit;
+            box-shadow: 0 10px 26px rgba(245, 166, 35, 0.28);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 36px rgba(245, 166, 35, 0.36);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--field-border);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover {
+            background: var(--field);
+            color: #fff;
+        }
+
+        .links {
+            margin-top: 20px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+        .links a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            margin-top: 24px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.22);
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+        .copyright strong {
+            color: rgba(245, 166, 35, 0.45);
+        }
+
+        @media (max-width: 480px) {
+            .expired-container {
+                padding: 32px 20px 24px;
+            }
+            .title {
+                font-size: 1.3rem;
+            }
+            .icon-wrapper {
+                width: 64px;
+                height: 64px;
+            }
+            .icon-wrapper i {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="expired-container">
+        <div class="icon-wrapper">
+            <i class="fas fa-clock"></i>
+        </div>
+
+        <h1 class="title">انتهت الفترة التجريبية</h1>
+        <p class="subtitle">
+            عذراً، الفترة التجريبية لنظام QuickData ProSoft قد انتهت.<br />
+            يرجى التواصل مع الإدارة لتجديد الاشتراك.
+        </p>
+
+        <div class="info-card" id="companyInfo">
+            <div class="label">الشركة</div>
+            <div class="value" id="companyName">--</div>
+        </div>
+
+        <button class="btn-primary" onclick="contactSupport()">
+            <i class="fas fa-envelope"></i> التواصل مع الدعم الفني
+        </button>
+
+        <button class="btn-secondary" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+        </button>
+
+        <div class="links">
+            <a href="login.html">تسجيل الدخول مرة أخرى</a>
+        </div>
+
+        <div class="copyright">
+            © 2026 جميع الحقوق محفوظة لـ <strong>QuickData ProSoft</strong>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================
+         * REAL VIEWPORT HEIGHT FIX
+         * ============================================================
+         */
+        function setRealViewportHeight() {
+            document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+        }
+        setRealViewportHeight();
+        window.addEventListener('resize', setRealViewportHeight);
+        window.addEventListener('orientationchange', setRealViewportHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setRealViewportHeight);
+        }
+
+        /**
+         * ============================================================
+         * LOGOUT
+         * ============================================================
+         */
+        async function logout() {
+            try {
+                localStorage.removeItem('rollex_session');
+                sessionStorage.removeItem('rollex_session');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('❌ خطأ في تسجيل الخروج:', error);
+            }
+        }
+
+        /**
+         * ============================================================
+         * CONTACT SUPPORT
+         * ============================================================
+         */
+        function contactSupport() {
+            window.location.href = 'mailto:support@quickdata.com?subject=طلب%20تجديد%20اشتراك%20-%20QuickData%20ProSoft';
+        }
+
+        /**
+         * ============================================================
+         * LOAD COMPANY INFO
+         * ============================================================
+         */
+        (async function init() {
+            console.log('⏰ صفحة انتهاء الفترة التجريبية');
+
+            try {
+                var profile = await getCurrentUserProfile();
+                if (profile && profile.company_name) {
+                    document.getElementById('companyName').textContent = profile.company_name;
+                } else {
+                    var companyId = await getCompanyId();
+                    if (companyId) {
+                        var token = getToken();
+                        if (token) {
+                            var response = await fetch(SUPABASE_URL + '/rest/v1/companies?select=name&id=eq.' + companyId, {
+                                headers: {
+                                    'apikey': SUPABASE_ANON_KEY,
+                                    'Authorization': 'Bearer ' + token
+                                }
+                            });
+                            if (response.ok) {
+                                var data = await response.json();
+                                if (data && data.length > 0) {
+                                    document.getElementById('companyName').textContent = data[0].name;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ فشل جلب اسم الشركة:', error.message);
+            }
+        })();
+    </script>
+
+</body>
+</html>
