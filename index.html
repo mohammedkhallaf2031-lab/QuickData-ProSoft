@@ -659,6 +659,7 @@
         // LOGOUT
         // ============================================================
         async function logout() {
+            console.log('🚪 جاري تسجيل الخروج...');
             localStorage.removeItem('rollex_session');
             sessionStorage.removeItem('rollex_session');
             window.location.href = 'login.html';
@@ -670,7 +671,9 @@
         // ============================================================
         async function updateUserInfo() {
             try {
+                console.log('📤 جاري جلب معلومات المستخدم...');
                 var profile = await getCurrentUserProfile();
+                console.log('📥 profile:', profile);
                 if (profile) {
                     var userName = document.getElementById('userName');
                     var userRole = document.getElementById('userRole');
@@ -688,6 +691,9 @@
                     }
                     if (headerAvatar) headerAvatar.textContent = (profile.name || 'م')[0];
                     if (sidebarAvatar) sidebarAvatar.textContent = (profile.name || 'م')[0];
+                    console.log('✅ تم تحديث معلومات المستخدم بنجاح');
+                } else {
+                    console.warn('⚠️ لم يتم العثور على بروفايل المستخدم');
                 }
             } catch (error) {
                 console.error('❌ خطأ في تحديث معلومات المستخدم:', error);
@@ -699,7 +705,9 @@
         // ============================================================
         async function updateStats() {
             var token = getToken();
+            console.log('🔑 التوكن:', token ? 'موجود' : 'غير موجود');
             if (!token) {
+                console.warn('⚠️ لا يوجد توكن، جاري التوجيه لتسجيل الدخول...');
                 window.location.href = 'login.html';
                 return;
             }
@@ -707,20 +715,27 @@
             try {
                 var profile = await getCurrentUserProfile();
                 var isSuperAdmin = profile ? profile.is_super_admin : false;
+                console.log('👤 isSuperAdmin:', isSuperAdmin);
 
                 // جلب عدد المستخدمين
+                console.log('📤 جلب عدد المستخدمين...');
                 var usersResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles?select=id', {
                     headers: {
                         'apikey': SUPABASE_ANON_KEY,
                         'Authorization': 'Bearer ' + token
                     }
                 });
+                console.log('📥 usersResponse status:', usersResponse.status);
                 if (usersResponse.ok) {
                     var usersData = await usersResponse.json();
                     document.getElementById('totalUsers').textContent = usersData.length || 0;
+                    console.log('✅ عدد المستخدمين:', usersData.length);
+                } else {
+                    console.warn('⚠️ فشل جلب المستخدمين، status:', usersResponse.status);
                 }
 
                 // جلب عدد الشركات
+                console.log('📤 جلب عدد الشركات...');
                 var companiesUrl = SUPABASE_URL + '/rest/v1/companies?select=id';
                 if (!isSuperAdmin) {
                     var companyId = await getCompanyId();
@@ -732,14 +747,20 @@
                         'Authorization': 'Bearer ' + token
                     }
                 });
+                console.log('📥 companiesResponse status:', companiesResponse.status);
                 if (companiesResponse.ok) {
                     var companiesData = await companiesResponse.json();
                     document.getElementById('totalCompanies').textContent = companiesData.length || 0;
+                    console.log('✅ عدد الشركات:', companiesData.length);
+                } else {
+                    console.warn('⚠️ فشل جلب الشركات، status:', companiesResponse.status);
                 }
 
                 // جلب معلومات الشركة والفترة التجريبية
                 if (!isSuperAdmin) {
+                    console.log('📤 جلب حالة الاشتراك...');
                     var subscription = await getCompanySubscriptionStatus();
+                    console.log('📥 subscription:', subscription);
                     if (subscription) {
                         document.getElementById('trialDays').textContent = subscription.daysRemaining + ' يوم';
                         var statusMap = {
@@ -765,9 +786,38 @@
         // ============================================================
         (async function init() {
             console.log('🏢 QuickData ProSoft - نظام إدارة الشركات');
+            console.log('🌐 SUPABASE_URL:', SUPABASE_URL);
 
             var token = getToken();
+            console.log('🔑 التوكن:', token ? 'موجود (' + token.substring(0, 20) + '...)' : 'غير موجود');
+            
             if (!token) {
+                console.warn('⚠️ لا يوجد توكن، جاري التوجيه لتسجيل الدخول...');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // التحقق من صحة التوكن
+            try {
+                console.log('📤 التحقق من صحة التوكن...');
+                var userResponse = await fetch(SUPABASE_URL + '/auth/v1/user', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                console.log('📥 userResponse status:', userResponse.status);
+                
+                if (!userResponse.ok) {
+                    console.warn('⚠️ التوكن غير صالح، status:', userResponse.status);
+                    localStorage.removeItem('rollex_session');
+                    sessionStorage.removeItem('rollex_session');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                console.log('✅ التوكن صالح');
+            } catch (error) {
+                console.error('❌ خطأ في التحقق من التوكن:', error);
                 window.location.href = 'login.html';
                 return;
             }
