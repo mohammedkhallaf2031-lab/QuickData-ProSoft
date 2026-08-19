@@ -394,7 +394,7 @@
 
             <div class="options-row">
                 <div class="remember">
-                    <input type="checkbox" id="remember" name="remember" />
+                    <input type="checkbox" id="remember" name="remember" checked />
                     <label for="remember">تذكرني</label>
                 </div>
                 <div class="forgot">
@@ -482,6 +482,8 @@
             messageDiv.innerHTML = '';
 
             try {
+                console.log('📤 محاولة تسجيل الدخول:', email);
+                
                 var response = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                     method: 'POST',
                     headers: {
@@ -492,23 +494,38 @@
                 });
 
                 var data = await response.json();
+                console.log('📥 Response status:', response.status);
 
                 if (!response.ok) {
                     var errorMsg = data.msg || data.message || 'بيانات الدخول غير صحيحة';
                     throw new Error(errorMsg);
                 }
 
+                if (!data.access_token) {
+                    throw new Error('فشل في الحصول على التوكن');
+                }
+
+                // حفظ الجلسة
                 var storage = document.getElementById('remember').checked ? window.localStorage : window.sessionStorage;
-                storage.setItem('rollex_session', JSON.stringify({
+                var sessionData = {
                     access_token: data.access_token,
                     refresh_token: data.refresh_token,
                     expires_at: Date.now() + (data.expires_in * 1000)
-                }));
+                };
+                storage.setItem('rollex_session', JSON.stringify(sessionData));
+                console.log('✅ تم حفظ الجلسة في storage:', sessionData);
+                console.log('📌 مفتاح التخزين: rollex_session');
+                console.log('🔑 التوكن المحفوظ:', data.access_token.substring(0, 30) + '...');
+
+                // التحقق من أن الجلسة اتحفظت
+                var saved = localStorage.getItem('rollex_session');
+                console.log('📦 التحقق من الحفظ:', saved ? '✅ موجود' : '❌ غير موجود');
 
                 messageDiv.className = 'message success';
                 messageDiv.innerHTML = '✅ تم تسجيل الدخول بنجاح! جاري التحويل...';
 
                 setTimeout(function() {
+                    console.log('🔄 جاري التوجيه إلى index.html');
                     window.location.href = 'index.html';
                 }, 900);
 
@@ -527,22 +544,38 @@
         // SESSION CHECK
         // ============================================================
         (async function() {
+            console.log('👤 صفحة تسجيل الدخول - QuickData ProSoft');
+            console.log('🌐 SUPABASE_URL:', SUPABASE_URL);
+            
             var token = getToken();
+            console.log('🔑 التوكن الموجود:', token ? 'موجود (' + token.substring(0, 20) + '...)' : 'غير موجود');
+            
             if (token) {
                 try {
+                    console.log('📤 التحقق من صحة التوكن...');
                     var response = await fetch(SUPABASE_URL + '/auth/v1/user', {
                         headers: {
                             'apikey': SUPABASE_ANON_KEY,
                             'Authorization': 'Bearer ' + token
                         }
                     });
+                    console.log('📥 Response status:', response.status);
+                    
                     if (response.ok) {
+                        console.log('✅ جلسة صالحة، جاري التوجيه إلى الرئيسية...');
                         window.location.href = 'index.html';
                         return;
+                    } else {
+                        console.warn('⚠️ التوكن غير صالح، سيتم حذفه');
+                        localStorage.removeItem('rollex_session');
+                        sessionStorage.removeItem('rollex_session');
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn('⚠️ فشل التحقق من الجلسة:', e.message);
+                }
             }
-            console.log('👤 صفحة تسجيل الدخول');
+            
+            console.log('👤 المستخدم غير مسجل دخول، مرحباً بك في صفحة تسجيل الدخول');
         })();
     </script>
 
