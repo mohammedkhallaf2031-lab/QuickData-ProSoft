@@ -15,26 +15,9 @@
             box-sizing: border-box;
         }
 
-        /* إزالة body.loading و body.ready نهائياً */
         body {
-            font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
-            direction: rtl;
-            min-height: 100vh;
-            min-height: calc(var(--vh, 1vh) * 100);
-            min-height: 100dvh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 20px;
-            padding-top: max(24px, env(safe-area-inset-top));
-            padding-bottom: max(24px, env(safe-area-inset-bottom));
-            padding-left: max(20px, env(safe-area-inset-left));
-            padding-right: max(20px, env(safe-area-inset-right));
-            position: relative;
-            background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
-            overflow-x: hidden;
-            overflow-y: auto;
+            opacity: 1 !important;
+            pointer-events: auto !important;
         }
 
         :root {
@@ -58,6 +41,27 @@
             background: var(--navy-bg-2);
             height: 100%;
             overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+            direction: rtl;
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            padding-top: max(24px, env(safe-area-inset-top));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            position: relative;
+            background: radial-gradient(ellipse at 50% 40%, #232f40 0%, var(--navy-bg) 55%, var(--navy-bg-2) 100%);
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .ring-wrap {
@@ -362,7 +366,84 @@
             <h1 class="title">إنشاء حساب</h1>
 
             <form id="registerForm" novalidate>
-                <!-- نفس الفورم -->
+
+                <div class="form-group">
+                    <label for="name">الاسم الكامل</label>
+                    <div class="input-wrap" id="nameWrap">
+                        <span class="input-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <input type="text" id="name" name="name" placeholder="أحمد محمد المدير" required autocomplete="name" aria-describedby="nameError" />
+                    </div>
+                    <div class="field-error" id="nameError" role="alert">
+                        <span aria-hidden="true">⚠</span><span>يرجى إدخال الاسم الكامل</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <div class="input-wrap" id="emailWrap">
+                        <span class="input-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+                        </span>
+                        <input type="email" id="email" name="email" placeholder="admin@company.com" required autocomplete="email" aria-describedby="emailError" />
+                    </div>
+                    <div class="field-error" id="emailError" role="alert">
+                        <span aria-hidden="true">⚠</span><span>يرجى إدخال بريد إلكتروني صالح</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <div class="input-wrap" id="passwordWrap">
+                        <span class="input-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <input type="password" id="password" name="password" placeholder="•••••••• (6 أحرف على الأقل)" required minlength="6" autocomplete="new-password" aria-describedby="passwordError" />
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="إظهار/إخفاء كلمة المرور">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="field-error" id="passwordError" role="alert">
+                        <span aria-hidden="true">⚠</span><span>كلمة المرور يجب أن تكون 6 أحرف على الأقل</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور</label>
+                    <div class="input-wrap" id="confirmPasswordWrap">
+                        <span class="input-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="أعد كتابة كلمة المرور" required minlength="6" autocomplete="new-password" aria-describedby="confirmPasswordError" />
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="إظهار/إخفاء كلمة المرور">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="field-error" id="confirmPasswordError" role="alert">
+                        <span aria-hidden="true">⚠</span><span>كلمة المرور غير متطابقة</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyName">اسم الشركة</label>
+                    <div class="input-wrap" id="companyWrap">
+                        <span class="input-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M16 18h.01"/></svg>
+                        </span>
+                        <input type="text" id="companyName" name="companyName" placeholder="شركة النور للتجارة" required autocomplete="organization" aria-describedby="companyError" />
+                    </div>
+                    <div class="field-error" id="companyError" role="alert">
+                        <span aria-hidden="true">⚠</span><span>يرجى إدخال اسم الشركة</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="registerBtn">
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                    <span class="btn-label">إنشاء الحساب</span>
+                </button>
+
+                <div id="message" class="message" role="status" aria-live="polite"></div>
             </form>
 
             <div class="links">
@@ -380,9 +461,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <script>
-        // ============================================================
-        // REAL VIEWPORT HEIGHT FIX
-        // ============================================================
+        /**
+         * ============================================================
+         * REAL VIEWPORT HEIGHT FIX
+         * ============================================================
+         */
         function setRealViewportHeight() {
             document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
         }
@@ -393,15 +476,20 @@
             window.visualViewport.addEventListener('resize', setRealViewportHeight);
         }
 
-        // ============================================================
-        // BUILD RING (الحلقة المزخرفة)
-        // ============================================================
+        /**
+         * ============================================================
+         * بناء الحلقة المتقطعة المزخرفة (SVG)
+         * ============================================================
+         */
         (function buildRing() {
             var ring = document.getElementById('ring');
             var size = 600;
-            var cx = size / 2, cy = size / 2, r = size / 2 - 20;
+            var cx = size / 2,
+                cy = size / 2,
+                r = size / 2 - 20;
             var total = 48;
-            var litStart = 4, litEnd = 15;
+            var litStart = 4,
+                litEnd = 15;
             var svgNS = 'http://www.w3.org/2000/svg';
             var svg = document.createElementNS(svgNS, 'svg');
             svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
@@ -426,9 +514,30 @@
             ring.appendChild(svg);
         })();
 
-        // ============================================================
-        // TOGGLE PASSWORD
-        // ============================================================
+        /**
+         * ============================================================
+         * تأثير التموّج عند النقر على الزر
+         * ============================================================
+         */
+        var registerBtn = document.getElementById('registerBtn');
+        registerBtn.addEventListener('click', function(e) {
+            if (registerBtn.disabled) return;
+            var rect = this.getBoundingClientRect();
+            var ripple = document.createElement('span');
+            var size = Math.max(rect.width, rect.height);
+            ripple.className = 'ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            this.appendChild(ripple);
+            setTimeout(function() { ripple.remove(); }, 650);
+        });
+
+        /**
+         * ============================================================
+         * زر إظهار/إخفاء كلمة المرور
+         * ============================================================
+         */
         function setupTogglePassword(inputId, toggleId) {
             var input = document.getElementById(inputId);
             var toggle = document.getElementById(toggleId);
@@ -443,9 +552,11 @@
         setupTogglePassword('password', 'togglePassword');
         setupTogglePassword('confirmPassword', 'toggleConfirmPassword');
 
-        // ============================================================
-        // CREATE COMPANY
-        // ============================================================
+        /**
+         * ============================================================
+         * دالة إنشاء شركة جديدة في جدول companies
+         * ============================================================
+         */
         async function createCompany(companyName) {
             var response = await fetch(SUPABASE_URL + '/rest/v1/companies', {
                 method: 'POST',
@@ -471,9 +582,11 @@
             return data && data.length > 0 ? data[0] : null;
         }
 
-        // ============================================================
-        // CREATE PROFILE
-        // ============================================================
+        /**
+         * ============================================================
+         * دالة إنشاء البروفايل (المستخدم) في جدول profiles
+         * ============================================================
+         */
         async function createProfile(userId, name, email, companyId, companyName, role) {
             var token = getToken();
             if (!token) throw new Error('لا يوجد توكن');
@@ -505,28 +618,13 @@
             return await response.json();
         }
 
-        // ============================================================
-        // DELETE COMPANY (للتراجع)
-        // ============================================================
-        async function deleteCompany(companyId) {
-            var token = getToken();
-            if (!token) return;
-
-            await fetch(SUPABASE_URL + '/rest/v1/companies?id=eq.' + companyId, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-        }
-
-        // ============================================================
-        // REGISTER FORM
-        // ============================================================
+        /**
+         * ============================================================
+         * نموذج إنشاء حساب
+         * ============================================================
+         */
         var registerForm = document.getElementById('registerForm');
         var messageDiv = document.getElementById('message');
-        var registerBtn = document.getElementById('registerBtn');
         var btnLabel = registerBtn.querySelector('.btn-label');
 
         var nameInput = document.getElementById('name');
@@ -579,8 +677,6 @@
 
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            if (registerBtn.disabled) return;
 
             var name = nameInput.value.trim();
             var email = emailInput.value.trim();
@@ -699,7 +795,16 @@
                 if (createdCompanyId) {
                     console.log('🗑️ جاري حذف الشركة (تراجع)...');
                     try {
-                        await deleteCompany(createdCompanyId);
+                        var token = getToken();
+                        if (token) {
+                            await fetch(SUPABASE_URL + '/rest/v1/companies?id=eq.' + createdCompanyId, {
+                                method: 'DELETE',
+                                headers: {
+                                    'apikey': SUPABASE_ANON_KEY,
+                                    'Authorization': 'Bearer ' + token
+                                }
+                            });
+                        }
                     } catch (e) {
                         console.warn('⚠️ فشل حذف الشركة:', e.message);
                     }
@@ -714,7 +819,24 @@
             btnLabel.textContent = 'إنشاء الحساب';
         });
 
-        console.log('📌 صفحة التسجيل - QuickData ProSoft');
+        function showMessage(text, type) {
+            var icon = type === 'success' ?
+                '<svg class="checkmark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3 3 7-7"/></svg>' :
+                '<span aria-hidden="true">⚠</span>';
+            messageDiv.innerHTML = icon + '<span>' + text + '</span>';
+            messageDiv.className = 'message ' + type;
+        }
+
+        function hideMessage() {
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = '';
+        }
+
+        console.log('🏢 QuickData ProSoft - نظام إدارة الشركات');
+        console.log('✅ النظام جاهز للعمل');
+        console.log('📌 التسجيل متاح للشركات الجديدة فقط');
+        console.log('📌 يتم إنشاء الشركة والمستخدم الأول كـ admin تلقائياً');
+        console.log('🔒 في حال وجود جلسة نشطة، سيتم توجيهك للرئيسية فوراً');
     </script>
 
 </body>
