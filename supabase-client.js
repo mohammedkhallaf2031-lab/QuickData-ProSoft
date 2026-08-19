@@ -1,7 +1,7 @@
 // ============================================================
 // SUPABASE CONFIGURATION - QuickData ProSoft
 // ============================================================
-const SUPABASE_URL = 'https://ejnhtqdbbjekkfrmwllo.supabase.co';
+const SUPABASE_URL = 'https://ejnhtqddbjejkkfmwllo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Ce8u1KEUYfMxYIayNF_CGQ_B7edEg2y';
 
 // ============================================================
