@@ -1198,18 +1198,26 @@
         }
 
         // ============================================================
-        // SAVE USER
+        // SAVE USER - النهائي مع التحقق من جميع العناصر
         // ============================================================
         async function saveUser(event) {
             event.preventDefault();
 
-            var id = document.getElementById('editId').value;
-            var userId = document.getElementById('editUserId').value;
-            var name = document.getElementById('userName').value.trim();
-            var email = document.getElementById('userEmail').value.trim();
-            var password = document.getElementById('userPassword').value;
-            var role = document.getElementById('userRole').value;
-            var status = document.getElementById('userStatus').value === 'true';
+            var editIdInput = document.getElementById('editId');
+            var editUserIdInput = document.getElementById('editUserId');
+            var nameInput = document.getElementById('userName');
+            var emailInput = document.getElementById('userEmail');
+            var passwordInput = document.getElementById('userPassword');
+            var roleSelect = document.getElementById('userRole');
+            var statusSelect = document.getElementById('userStatus');
+
+            var id = editIdInput ? editIdInput.value : '';
+            var userId = editUserIdInput ? editUserIdInput.value : '';
+            var name = nameInput ? nameInput.value.trim() : '';
+            var email = emailInput ? emailInput.value.trim() : '';
+            var password = passwordInput ? passwordInput.value : '';
+            var role = roleSelect ? roleSelect.value : 'employee';
+            var status = statusSelect ? statusSelect.value === 'true' : true;
 
             if (!name || !email) {
                 showToast('⚠️ تنبيه', 'يرجى ملء جميع الحقول المطلوبة', 'error');
@@ -1352,7 +1360,7 @@
                         throw new Error('فشل إنشاء المستخدم');
                     }
 
-                    var newProfile = await insertRow('profiles', {
+                    await insertRow('profiles', {
                         id: data.user.id,
                         name: name,
                         email: email,
