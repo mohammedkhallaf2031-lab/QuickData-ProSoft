@@ -1267,7 +1267,9 @@
                     throw new Error('لم يتم العثور على الشركة');
                 }
 
+                // ============================================================
                 // جلب اسم الشركة من قاعدة البيانات مباشرة
+                // ============================================================
                 var companyName = '';
                 var companyResp = await fetch(SUPABASE_URL + '/rest/v1/companies?select=name&id=eq.' + companyId, {
                     headers: {
@@ -1283,6 +1285,7 @@
                 }
 
                 if (id) {
+                    // تحديث مستخدم موجود
                     await patchRow('profiles', id, {
                         name: name,
                         email: email,
@@ -1321,6 +1324,7 @@
                     showToast('✅ تم التعديل', 'تم تحديث المستخدم بنجاح', 'success');
 
                 } else {
+                    // إضافة مستخدم جديد
                     if (!password || password.length < 6) {
                         showToast('⚠️ تنبيه', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
                         btn.disabled = false;
