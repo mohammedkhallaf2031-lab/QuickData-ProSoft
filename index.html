@@ -1,110 +1,785 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickData ProSoft</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>الرئيسية · QuickData ProSoft</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="supabase-client.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --canvas: #f6f3ec;
+            --surface: #ffffff;
+            --surface-2: #fbf9f4;
+            --line: rgba(33, 29, 26, 0.11);
+            --line-soft: rgba(33, 29, 26, 0.06);
+            --ink: #211d1a;
+            --ink-2: #6e645a;
+            --ink-3: #a69c90;
+            --ink-4: #d8d0c4;
+            --gold: #b3813a;
+            --gold-light: #f1e0ba;
+            --gold-dark: #8a611f;
+            --gold-glow: rgba(179, 129, 58, 0.11);
+            --gold-gradient: linear-gradient(135deg, #d3a25a 0%, #b3813a 48%, #8a611f 100%);
+            --navy: #212b42;
+            --navy-gradient: linear-gradient(135deg, #384464 0%, #212b42 100%);
+            --teal: #1d7b6c;
+            --teal-soft: #e2f2ee;
+            --rust: #bf4f30;
+            --rust-soft: #fbe8e1;
+            --sidebar-w: 270px;
+            --header-h: 68px;
+            --r-lg: 18px;
+            --r-md: 12px;
+            --r-sm: 8px;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Cairo', sans-serif;
-            background: #f6f3ec;
+            font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+            background: var(--canvas);
+            color: var(--ink);
+            direction: rtl;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { font-family: inherit; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 10px; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(33, 29, 26, 0.4);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity .25s ease;
+            pointer-events: none;
+        }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--surface-2);
+            border-left: 1px solid var(--line);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: right .35s var(--ease);
+        }
+        .sidebar.collapsed { right: calc(-1 * var(--sidebar-w)); }
+
+        .sidebar .brand {
+            padding: 24px 22px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--line);
+            background: var(--navy-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        .sidebar .brand::before {
+            content: '';
+            position: absolute;
+            inset: -40% -10%;
+            background: linear-gradient(115deg, transparent 38%, rgba(211, 162, 90, 0.55) 48%, rgba(179, 129, 58, 0.25) 54%, transparent 62%);
+            pointer-events: none;
+        }
+        .sidebar .brand::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gold-gradient);
+        }
+        .sidebar .brand .mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            direction: rtl;
-            padding: 20px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(211, 162, 90, 0.4);
+            color: var(--gold-light);
+            position: relative;
+            z-index: 1;
         }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 40px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-            text-align: center;
+        .sidebar .brand .text {
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: #fff;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
         }
-        .logo {
-            color: #b3813a;
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #6e645a;
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 32px;
-            border-radius: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            margin: 6px;
-            transition: 0.3s;
-        }
-        .btn-primary {
-            background: #b3813a;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #8a611f;
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
-            border: 2px solid #b3813a;
-            color: #b3813a;
-        }
-        .btn-secondary:hover {
-            background: #b3813a;
-            color: white;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            background: #f1e0ba;
-            border-radius: 10px;
-            color: #8a611f;
+        .sidebar .brand .text span {
+            display: block;
+            font-size: 0.6rem;
             font-weight: 600;
+            color: var(--gold-light);
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+
+        .sidebar .menu {
+            flex: 1;
+            padding: 14px 12px;
+        }
+        .sidebar .menu .label {
+            font-size: 0.6rem;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 10px 6px;
+            font-weight: 700;
+        }
+        .sidebar .menu .label:first-child { padding-top: 4px; }
+
+        .sidebar .menu .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--r-sm);
+            color: var(--ink-2);
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: background .15s ease, color .15s ease;
+            cursor: pointer;
+            margin-bottom: 2px;
+            position: relative;
+            border-inline-end: 3px solid transparent;
+        }
+        .sidebar .menu .item:hover {
+            background: rgba(33, 29, 26, 0.04);
+            color: var(--ink);
+        }
+        .sidebar .menu .item.active {
+            background: var(--surface);
+            color: var(--ink);
+            box-shadow: 0 2px 10px rgba(33, 29, 26, 0.08);
+            border-inline-end: 3px solid var(--swatch, var(--ink));
+        }
+        .sidebar .menu .item i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.86rem;
+            opacity: 0.8;
+        }
+
+        .sidebar .footer {
+            padding: 14px 18px 20px;
+            border-top: 1px solid var(--line);
+        }
+        .sidebar .footer .user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar .footer .user .avatar {
+            width: 33px;
+            height: 33px;
+            border-radius: var(--r-sm);
+            background: var(--gold-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .sidebar .footer .user .info .name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .sidebar .footer .user .info .role {
+            font-size: 0.62rem;
+            color: var(--ink-3);
+            margin-top: 1px;
+        }
+        .sidebar .footer .logout {
+            margin-right: auto;
+            width: 28px;
+            height: 28px;
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-3);
+            border: 1px solid var(--line);
+            transition: .15s;
+            cursor: pointer;
+            background: transparent;
+        }
+        .sidebar .footer .logout:hover {
+            color: var(--rust);
+            border-color: var(--rust);
+        }
+
+        .main {
+            margin-right: var(--sidebar-w);
+            min-height: 100vh;
+            transition: margin-right .35s var(--ease);
+        }
+        .main.expanded { margin-right: 0; }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: var(--header-h);
+            padding: 0 30px;
+            background: rgba(246, 243, 236, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header .hamburger {
+            display: flex;
+            width: 34px;
+            height: 34px;
+            border-radius: var(--r-sm);
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: .15s;
+        }
+        .header .hamburger:hover {
+            border-color: var(--ink-3);
+            color: var(--ink);
+        }
+        .header .breadcrumb {
+            font-size: 0.79rem;
+            color: var(--ink-3);
+        }
+        .header .breadcrumb b {
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .header .right {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .header .right .profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 12px 3px 5px;
+            border-radius: 50px;
+            border: 1px solid var(--line);
+            cursor: pointer;
+            transition: .15s;
+            background: var(--surface);
+        }
+        .header .right .profile:hover {
+            border-color: var(--ink-3);
+        }
+        .header .right .profile .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+        .header .right .profile .name {
+            font-size: 0.77rem;
+            font-weight: 700;
+        }
+        .header .right .profile .name small {
+            display: block;
+            font-size: 0.58rem;
+            font-weight: 500;
+            color: var(--ink-3);
+        }
+
+        .dash {
+            padding: 26px 30px 44px;
+            max-width: 1500px;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            padding: 8px 6px 26px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .hero .copy {
+            flex: 1;
+            min-width: 260px;
+        }
+        .hero .eyebrow {
+            font-size: 0.68rem;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .hero .copy h1 {
+            font-weight: 900;
+            font-size: 1.85rem;
+            color: var(--ink);
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+        }
+        .hero .copy h1 .highlight {
+            color: var(--gold);
+        }
+        .hero .copy p {
+            color: var(--ink-2);
+            font-size: 0.87rem;
+            margin-top: 10px;
+            max-width: 38ch;
+        }
+        .hero .goal-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+        .hero .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: 50px;
+            background: var(--navy-gradient);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.82rem;
+            transition: transform .2s var(--ease), background .2s ease;
+        }
+        .hero .cta:hover {
+            transform: translateY(-2px);
+            background: #0a0e14;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            padding: 18px 20px;
+            overflow: hidden;
+            transition: transform .2s var(--ease), box-shadow .2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px -10px rgba(33, 29, 26, 0.2);
+        }
+        .stat-card .icon {
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+        .stat-card .label {
+            font-size: 0.71rem;
+            color: var(--ink-3);
+            font-weight: 600;
+        }
+        .stat-card .number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 4px;
+            letter-spacing: -0.2px;
+            color: var(--ink);
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--r-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .panel .p-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .panel .p-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--ink);
+        }
+        .panel .p-sub {
+            font-size: 0.73rem;
+            color: var(--ink-3);
+            margin-top: 3px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink-3);
             font-size: 0.85rem;
+        }
+        .empty-state i {
+            font-size: 2rem;
+            color: var(--ink-4);
+            margin-bottom: 10px;
+            display: block;
+        }
+        .fade-up {
+            opacity: 0;
+            transform: translateY(8px);
+            animation: fadeUp .55s var(--ease) forwards;
+        }
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1180px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 992px) {
+            .hero { flex-direction: column; align-items: stretch; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { right: calc(-1 * var(--sidebar-w)); }
+            .sidebar.open { right: 0; }
+            .sidebar-overlay { display: block; }
+            .main { margin-right: 0 !important; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .dash { padding: 18px 16px 34px; }
+            .header { padding: 0 16px; }
+            .header .right .profile .name { display: none; }
+            .header .hamburger { width: 42px; height: 42px; font-size: 1rem; }
+            .hero .copy h1 { font-size: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .stats { grid-template-columns: 1fr; }
+            .header .breadcrumb { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">QuickData ProSoft</div>
-        <p class="subtitle">نظام إدارة متكامل للشركات</p>
 
-        <div>
-            <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
-            <a href="register.html" class="btn btn-secondary">إنشاء حساب</a>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="mark"><i class="fas fa-paint-roller"></i></div>
+            <div class="text">
+                نظام الإدارة
+                <span>QuickData ProSoft</span>
+            </div>
         </div>
 
-        <div class="status" id="statusMessage">⏳ جاري التحقق من الجلسة...</div>
+        <div class="menu">
+            <div class="label">القائمة الرئيسية</div>
+            <a href="index.html" class="item active" style="--swatch:var(--ink)"><i class="fas fa-house"></i> الرئيسية</a>
+
+            <div class="label">الإدارة</div>
+            <a href="companies.html" class="item" style="--swatch:var(--gold)"><i class="fas fa-building"></i> الشركات</a>
+            <a href="users.html" class="item" style="--swatch:var(--navy)"><i class="fas fa-users"></i> المستخدمين</a>
+
+            <div class="label">الإعدادات</div>
+            <a href="#" class="item"><i class="fas fa-gear"></i> الإعدادات</a>
+            <a href="#" class="item"><i class="fas fa-circle-question"></i> المساعدة</a>
+        </div>
+
+        <div class="footer">
+            <div class="user">
+                <div class="avatar" id="sidebarAvatar">م</div>
+                <div class="info">
+                    <div class="name" id="userName">مستخدم</div>
+                    <div class="role" id="userRole">موظف</div>
+                </div>
+                <button class="logout" onclick="logout()" title="تسجيل الخروج">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main" id="main">
+
+        <header class="header">
+            <div class="left">
+                <button class="hamburger" id="hamburger" aria-label="فتح/إغلاق القائمة الجانبية">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="breadcrumb"><b>الرئيسية</b> / لوحة التحكم</div>
+            </div>
+            <div class="right">
+                <div class="profile">
+                    <div class="avatar" id="headerAvatar">م</div>
+                    <div class="name" id="headerName">مستخدم<small id="headerRole">موظف</small></div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <button onclick="logout()" title="تسجيل الخروج" style="background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:1rem;padding:4px 8px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="dash">
+
+            <div class="hero fade-up" style="animation-delay:.02s">
+                <div class="copy">
+                    <div class="eyebrow">لوحة التحكم</div>
+                    <h1>مرحباً بك في <span class="highlight">نظام الإدارة</span></h1>
+                    <p id="companyInfo">ملخص أداء النظام اليومي.</p>
+                    <div class="goal-row">
+                        <a href="#" class="cta"><i class="fas fa-plus"></i> إضافة جديد</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card fade-up" style="animation-delay:.06s">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <div class="label">إجمالي المستخدمين</div>
+                    <div class="number" id="totalUsers">--</div>
+                </div>
+                <div class="stat-card fade-up" style="animation-delay:.09s">
+                    <div class="icon"><i class="fas fa-building"></i></div>
+                    <div class="label">الشركات</div>
+                    <div class="number" id="totalCompanies">--</div>
+                </div>
+                <div class="stat-card fade-up" style="animation-delay:.12s">
+                    <div class="icon"><i class="fas fa-clock"></i></div>
+                    <div class="label">الفترة التجريبية متبقية</div>
+                    <div class="number" id="trialDays">--</div>
+                </div>
+                <div class="stat-card fade-up" style="animation-delay:.15s">
+                    <div class="icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="label">حالة الاشتراك</div>
+                    <div class="number" id="subscriptionStatus">--</div>
+                </div>
+            </div>
+
+            <div class="panel fade-up" style="animation-delay:.12s">
+                <div class="p-head">
+                    <div>
+                        <div class="p-title">معلومات النظام</div>
+                        <div class="p-sub">حالة النظام والإعدادات العامة</div>
+                    </div>
+                </div>
+                <div id="systemInfo">
+                    <div class="empty-state">
+                        <i class="fas fa-info-circle"></i>
+                        <p>تم تحميل النظام بنجاح</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <script>
-        (async function() {
-            var token = getToken();
-            var statusEl = document.getElementById('statusMessage');
+        // ============================================================
+        // SIDEBAR TOGGLE
+        // ============================================================
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const hamburger = document.getElementById('hamburger');
+        const main = document.getElementById('main');
+        let mobileOpen = false;
 
-            if (token) {
+        function toggleSidebar() {
+            if (window.innerWidth <= 768) {
+                mobileOpen = !mobileOpen;
+                sidebar.classList.toggle('open', mobileOpen);
+                overlay.classList.toggle('active', mobileOpen);
+                document.body.style.overflow = mobileOpen ? 'hidden' : '';
+                hamburger.innerHTML = mobileOpen ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
+            } else {
+                const nowCollapsed = sidebar.classList.toggle('collapsed');
+                main.classList.toggle('expanded', nowCollapsed);
+            }
+        }
+        hamburger.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', () => {
+            if (window.innerWidth <= 768 && mobileOpen) toggleSidebar();
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                mobileOpen = false;
+                hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        async function logout() {
+            localStorage.removeItem('rollex_session');
+            sessionStorage.removeItem('rollex_session');
+            window.location.href = 'login.html';
+        }
+        window.logout = logout;
+
+        // ============================================================
+        // UPDATE USER INFO
+        // ============================================================
+        async function updateUserInfo() {
+            try {
                 var profile = await getCurrentUserProfile();
                 if (profile) {
-                    statusEl.innerHTML = '✅ مرحباً بك، ' + profile.name + '! جاري التوجيه...';
-                    setTimeout(function() {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                } else {
-                    statusEl.innerHTML = '👤 جلسة غير صالحة، يرجى تسجيل الدخول';
+                    var userName = document.getElementById('userName');
+                    var userRole = document.getElementById('userRole');
+                    var headerName = document.getElementById('headerName');
+                    var headerRole = document.getElementById('headerRole');
+                    var headerAvatar = document.getElementById('headerAvatar');
+                    var sidebarAvatar = document.getElementById('sidebarAvatar');
+
+                    if (userName) userName.textContent = profile.name || 'مستخدم';
+                    if (userRole) userRole.textContent = profile.is_super_admin ? 'مدير النظام' : (profile.role || 'موظف');
+                    if (headerName) {
+                        var nameText = profile.name || 'مستخدم';
+                        var roleText = profile.is_super_admin ? 'مدير النظام' : (profile.role || 'موظف');
+                        headerName.innerHTML = nameText + '<small>' + roleText + '</small>';
+                    }
+                    if (headerAvatar) headerAvatar.textContent = (profile.name || 'م')[0];
+                    if (sidebarAvatar) sidebarAvatar.textContent = (profile.name || 'م')[0];
                 }
-            } else {
-                statusEl.innerHTML = '👤 غير مسجل دخول. سجل دخول أو أنشئ حساب جديد.';
+            } catch (error) {
+                console.error('❌ خطأ في تحديث معلومات المستخدم:', error);
             }
+        }
+
+        // ============================================================
+        // UPDATE STATS
+        // ============================================================
+        async function updateStats() {
+            var token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                var profile = await getCurrentUserProfile();
+                var isSuperAdmin = profile ? profile.is_super_admin : false;
+
+                // جلب عدد المستخدمين
+                var usersResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles?select=id', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                if (usersResponse.ok) {
+                    var usersData = await usersResponse.json();
+                    document.getElementById('totalUsers').textContent = usersData.length || 0;
+                }
+
+                // جلب عدد الشركات
+                var companiesUrl = SUPABASE_URL + '/rest/v1/companies?select=id';
+                if (!isSuperAdmin) {
+                    var companyId = await getCompanyId();
+                    if (companyId) companiesUrl += '&id=eq.' + companyId;
+                }
+                var companiesResponse = await fetch(companiesUrl, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                if (companiesResponse.ok) {
+                    var companiesData = await companiesResponse.json();
+                    document.getElementById('totalCompanies').textContent = companiesData.length || 0;
+                }
+
+                // جلب معلومات الشركة والفترة التجريبية
+                if (!isSuperAdmin) {
+                    var subscription = await getCompanySubscriptionStatus();
+                    if (subscription) {
+                        document.getElementById('trialDays').textContent = subscription.daysRemaining + ' يوم';
+                        var statusMap = {
+                            'trial': 'تجريبي',
+                            'active': 'نشط',
+                            'expired': 'منتهي',
+                            'suspended': 'موقوف'
+                        };
+                        document.getElementById('subscriptionStatus').textContent = statusMap[subscription.status] || subscription.status;
+                    }
+                } else {
+                    document.getElementById('trialDays').textContent = 'غير محدود';
+                    document.getElementById('subscriptionStatus').textContent = 'مدير النظام';
+                }
+
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الإحصائيات:', error);
+            }
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        (async function init() {
+            console.log('🏢 QuickData ProSoft - نظام إدارة الشركات');
+
+            var token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            await updateUserInfo();
+            await updateStats();
+
+            setTimeout(function() {
+                startSessionMonitor();
+            }, 3000);
         })();
     </script>
+
 </body>
 </html>
