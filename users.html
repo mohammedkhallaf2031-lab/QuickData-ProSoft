@@ -1267,6 +1267,7 @@
                     throw new Error('لم يتم العثور على الشركة');
                 }
 
+                // جلب اسم الشركة من قاعدة البيانات مباشرة
                 var companyName = '';
                 var companyResp = await fetch(SUPABASE_URL + '/rest/v1/companies?select=name&id=eq.' + companyId, {
                     headers: {
