@@ -520,11 +520,14 @@
         }
 
         async function createProfile(userId, name, email, companyId, companyName, role) {
+            var token = getToken();
+            if (!token) throw new Error('لا يوجد توكن');
+            
             var response = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
                 method: 'POST',
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + (await supabase.auth.getSession()).data.session.access_token,
+                    'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 },
@@ -584,6 +587,7 @@
             messageDiv.innerHTML = '';
 
             try {
+                console.log('📤 التحقق من وجود الشركة...');
                 var companyExists = await checkCompanyExists(companyName);
 
                 if (companyExists) {
@@ -595,10 +599,12 @@
                     return;
                 }
 
+                console.log('📤 إنشاء شركة جديدة...');
                 var newCompany = await createCompany(companyName);
                 if (!newCompany) {
                     throw new Error('فشل إنشاء الشركة');
                 }
+                console.log('✅ تم إنشاء الشركة:', newCompany);
 
                 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: {
@@ -609,6 +615,7 @@
                     }
                 });
 
+                console.log('📤 إنشاء مستخدم جديد...');
                 var { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
@@ -632,10 +639,14 @@
                 if (!data.user) {
                     throw new Error('فشل إنشاء المستخدم');
                 }
+                console.log('✅ تم إنشاء المستخدم:', data.user.id);
 
+                console.log('📤 إنشاء البروفايل...');
                 await createProfile(data.user.id, name, email, newCompany.id, companyName, 'admin');
+                console.log('✅ تم إنشاء البروفايل');
 
                 localStorage.setItem('rollex_session', JSON.stringify(data.session));
+                console.log('✅ تم حفظ الجلسة');
 
                 messageDiv.className = 'message success';
                 messageDiv.innerHTML = '✅ تم إنشاء الحساب بنجاح! جاري التحويل...';
